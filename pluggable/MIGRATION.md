@@ -1,17 +1,45 @@
 # CKEditor for Mendix — Dojo → Pluggable Widget rewrite
 
-Branch: `react-ver`. This directory (`pluggable/`) holds the new React + TypeScript pluggable widget, built with
-`@mendix/pluggable-widgets-tools`. The old Dojo widget under `../src/` is left in place for reference until parity is
-reached.
+Branch: **`ckeditor4-react`** — the CKEditor **4.22.0** variant of the rewrite. It shares everything with `react-ver`
+(shared package, viewer widget, workspace, build tooling) and swaps only the editor widget's engine. The old Dojo widget
+under `../src/` is left in place for reference until parity is reached.
+
+## Why a CKEditor 4 branch
+
+|              | `react-ver` (CKEditor 5)                  | `ckeditor4-react` (this branch)                                                        |
+| ------------ | ----------------------------------------- | -------------------------------------------------------------------------------------- |
+| Editor       | CKEditor 5 v48, bundled (~4.8 MB `.mpk`)  | CKEditor 4.22.0, loaded at runtime (~52 KB `.mpk`)                                     |
+| Licence      | GPL-2.0-or-later + mandatory `licenseKey` | **GPL-2.0 / LGPL-2.1 / MPL-1.1 tri-licence** — usable in a proprietary app with no key |
+| Support      | active                                    | **EOL since June 2023** — no security patches for the open-source line                 |
+| Architecture | modern                                    | legacy (iframe editing, global `window.CKEDITOR`)                                      |
+
+Use this branch only if the permissive licence outweighs running an unpatched editor. 4.22.0 is the last open-source
+release; 4.22.1 is the last open-source _patch_ but is not on the CDN, and 4.23.0+ ("CKEditor 4 LTS") is
+paid/commercial.
 
 ## Target stack
 
-| Tool                              | Version                                                                 |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| React                             | ≥ 19 (peer, provided by the Mendix client — Mendix 11)                  |
-| `@mendix/pluggable-widgets-tools` | ≥ 9, **11.x recommended**                                               |
-| TypeScript                        | as bundled with pluggable-widgets-tools 11                              |
-| Editor                            | CKEditor 5 (`ckeditor5` + `@ckeditor/ckeditor5-react`), GPL license key |
+| Tool                              | Version                                                                |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| React                             | ≥ 19 (peer, provided by the Mendix client — Mendix 11)                 |
+| `@mendix/pluggable-widgets-tools` | 11.12 (same as `react-ver`)                                            |
+| TypeScript                        | as bundled with pluggable-widgets-tools 11                             |
+| Editor                            | **CKEditor 4.22.0** ("standard-all"), loaded at runtime via `<script>` |
+
+### Editor loading (this branch)
+
+-   `ckeditor4-react` (the npm package) is **not** used: its current majors are tied to the commercial LTS licence and
+    only declare React `^18`. Instead `src/components/Editor.tsx` is a hand-rolled `useEffect` wrapper —
+    `loadCKEditor()` injects the script once, `CKEDITOR.replace()` on mount, guarded `destroy(true)` on unmount (handles
+    React 19 StrictMode double-mount).
+-   Default script URL: `https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js` (still live). `config.versionCheck`
+    is set to `false` to silence the CDN "update available" nag.
+-   The **"Editor script URL"** widget property overrides it. For offline / no-external-request deployments, copy
+    `node_modules/ckeditor4/` into the Mendix app (e.g. `theme/web/ckeditor/`) and point the property at
+    `.../ckeditor/ckeditor.js`. `ckeditor4@4.22.0` is a devDependency purely to provide those files.
+-   The `mendixlink` plugin (`src/ckeditor4/mendixLinkPlugin.ts`) is registered on `window.CKEDITOR` before editor
+    creation — it's a near-direct port of the legacy Dojo widget's `plugin.js` + `dialogs/mendixlink.js`, but writes the
+    new `data-mf` wire format.
 
 ## Widgets
 
@@ -62,8 +90,10 @@ and on click runs the microflow mapped from `functionName` via the widget's `mic
     -   New editor writes: `<a class="... mx-microflow-link" data-mf="<functionName>" href="#">Label</a>`
     -   New viewer ALSO understands the legacy `onclick="CKEditorViewer.mf.exec('fn',…)"` form (parse `fn` out of it) so
         existing content keeps working.
--   Editor: a CKEditor 5 plugin `MendixLink` — schema node (inline element `mendixLink`), upcast/downcast converters, a
-    balloon/dialog UI to pick a `functionName` from the configured list + set label/title/css.
+-   Editor: a CKEditor plugin `mendixlink` — on `react-ver` a CKEditor 5 plugin (schema node + upcast/downcast + toolbar
+    dropdown); on this branch a CKEditor 4 plugin (toolbar button + context menu + a dialog for name/label/css/title,
+    `src/ckeditor4/mendixLinkPlugin.ts`). Both pick a `functionName` from the configured list and write the `data-mf`
+    form.
 -   Viewer: pure DOM pass over `dangerouslySetInnerHTML` output — find `a.mx-microflow-link`, read `data-mf` (or parse
     legacy `onclick`), attach a React-managed click handler that calls the matching `ActionValue.execute()`.
 
@@ -84,42 +114,71 @@ and on click runs the microflow mapped from `functionName` via the widget's `mic
 | `countPlugin`, `countPluginMaxCount`                                                                                | `showCount` boolean + `maxCount` int                                | CKEditor 5 `WordCount`                                     |
 | viewer `cutOffRules`                                                                                                | `maxLines` int                                                      | CSS line-clamp instead of dotdotdot                        |
 
-## Phases
+> The property-mapping notes above that mention CKEditor 5 (`shiftEnterMode`, `codeBlock`, `WordCount`, toolbar item
+> names, maximize) are from `react-ver`. On this branch: toolbar presets use CKEditor 4 button names
+> (`src/ckeditor4/toolbarPresets.ts`); `enterMode` maps to `CKEDITOR.ENTER_P/ENTER_BR`; `enableCodeHighlighting` and
+> `countPlugin` are **not yet ported** (`codeBlock` / `showCount` properties dropped for now).
 
-1. ✅ **Scaffold + build green** — npm-workspaces monorepo, both widget `.mpk`s build, shared unit tests + lint pass.
-   Editor renders CKEditor 5 bound to `content` with read-only support and `onChange`/`onKeyPress` actions.
-2. 🟡 **Microflow links** — `MendixLink` CKEditor plugin (editing converters + toolbar dropdown + command) and the
-   viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Still to do: a
-   proper balloon UI for label/CSS/title editing (currently name-only), and round-trip tests against real stored data.
-3. **Toolbar presets + enter mode + word count + code blocks** — presets wired; word-count UI element and enter-mode
-   parity need finishing.
-4. **Image handling** (base64 first, then upload via datasource/action) — not started.
-5. **oembed / media embed, line clamp, polish, editor preview, docs, app-developer migration guide** — not started.
+## Phases (this branch)
 
-### Build/tooling notes (resolved during scaffold)
+1. ✅ **Scaffold + build green** — both widget `.mpk`s build (editor 52 KB — CKEditor loaded at runtime), shared unit
+   tests + lint pass. Editor renders CKEditor 4.22.0 bound to `content`, read-only support, `onChange`/`onKeyPress`.
+2. 🟡 **Microflow links** — the CKEditor 4 `mendixlink` plugin (button + context menu + dialog for name/label/css/title)
+   and the viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Still
+   to do: real Studio Pro round-trip test, and dialog polish.
+3. **Toolbar / enter mode** — presets wired (basic/standard/full/custom); needs Studio Pro verification.
+4. **Code snippet + character count** — `codesnippet` / word-count plugins not in the "standard-all" build; add a
+   "full-all" build option or bundle the extra plugins.
+5. **Image handling** (base64 paste, then upload) — not started.
+6. **Self-hosted asset pipeline** — currently the CKEditor script is loaded from a URL (CDN default, or the
+   `editorScriptUrl` property). A `rollup.config.mjs` copy step to bundle `node_modules/ckeditor4/` into the `.mpk`
+   would remove the external request entirely — not done yet.
+
+### Build/tooling notes
 
 -   pwt resolved to **11.12.0** (Node ≥ 20; 11.13 needs Node 22 and this machine is on Node 24).
 -   pwt's tsconfig base uses `jsx: "react-jsx"` + `noUnusedLocals` — do **not** `import { createElement }` in `.tsx`.
--   React 19 types: `useRef<T>()` needs an explicit initial arg (`useRef<T | undefined>(undefined)`).
--   `shared` is consumed by the widget bundlers as **compiled JS** (`dist/`), not raw TS — rollup's typescript plugin
-    only compiles the widget's own `src/`.
+-   React 19 types: `useRef<T>()` needs an explicit initial arg; don't assign a ref during render (use an effect).
+-   `shared` is consumed by the widget bundlers as **compiled JS** (`dist/`), not raw TS.
 -   `.eslintrc.js` must use `require.resolve(...)` for the pwt base config (npm-workspaces resolution).
+-   CKEditor 4's `ckeditor.js` is a self-loading IIFE — it must be an external `<script>`, never Rollup-bundled.
 
 ## Known constraints / decisions
 
--   CKEditor 5 plugin API is completely different from CKEditor 4 — the old `plugin.js` and `dialogs/mendixlink.js` are
-    design references only, not portable code.
--   CKEditor 5 ≥ v44 requires a `licenseKey` — use `'GPL'` (the widget and CKEditor 5 are both GPL-compatible;
-    Apache-2.0 on this repo needs a licensing review before distribution — see below).
--   **Licensing**: current repo is Apache-2.0. CKEditor 5 open-source is GPL-2.0+. Bundling CKEditor 5 into a
-    distributed widget means the widget must be GPL, or a commercial CKEditor license is needed. Flag for the maintainer
-    before Marketplace release.
--   No inline `onclick` in stored HTML going forward (CSP + React). Legacy content is read-compatible but re-saved
-    content is migrated to `data-mf`.
+-   **Licence (the reason this branch exists)**: CKEditor **4.22.0** is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1
+    (`node_modules/ckeditor4/package.json` confirms). Under LGPL/MPL it can be used in a proprietary Mendix app with no
+    licence key and no copyleft on the app — the same footing the legacy Dojo widget relied on. The `rich-text` package
+    stays `Apache-2.0`.
+-   **Security**: CKEditor 4 open source is **EOL (June 2023)**. 4.22.0 will not receive security patches. For an editor
+    that stores and renders HTML this is a real risk — prefer `react-ver` (CKEditor 5) unless the licence is decisive.
+-   CKEditor 4 is a **global singleton** (`window.CKEDITOR`) — only one `ckeditor.js` per page. Fine for one widget; a
+    second widget needing a different CKEditor build would conflict.
+-   `config.versionCheck: false` is set to stop the CDN "update available" notification (CKEditor activated it for all
+    CDN loads on 2024-07-01).
+-   `ckeditor4-react` (npm) deliberately unused — see "Editor loading" above.
+-   No inline `onclick` in stored HTML going forward (CSP + React). Legacy content is read-compatible; re-saved content
+    is migrated to `data-mf`.
 
 ---
 
 # 한국어 번역 (Korean translation)
+
+> **이 브랜치(`ckeditor4-react`) 요약**: `react-ver` 재작성의 **CKEditor 4.22.0 변형**입니다. shared 패키지·뷰어위젯·워
+> 크스페이스·빌드 도구는 `react-ver`와 동일하고, **에디터 엔진만** CKEditor 5 → CKEditor 4로 교체했습니다.
+>
+> -   CKEditor 4.22.0은 **GPL-2.0 / LGPL-2.1 / MPL-1.1 3중 라이선스** — 라이선스 키 없이 비공개(프로프라이어터리) 앱에서
+>     사용 가능. 그래서 `rich-text` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
+> -   대가: CKEditor 4 오픈소스는 **2023년 6월 EOL** — 보안 패치 없음. 라이선스가 결정적이지 않다면 `react-ver`
+>     (CKEditor 5) 권장.
+> -   `.mpk` 52KB (CKEditor를 번들하지 않고 런타임에 `<script>`로 로드). 기본 URL은
+>     `https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js`, 위젯의 "Editor script URL" 속성으로 자체 호스팅 URL 지
+>     정 가능 (오프라인/외부요청 차단 환경).
+> -   `ckeditor4-react` npm 패키지는 **사용 안 함** (현재 메이저가 상용 LTS 라이선스에 묶여 있고 React `^18`만 선언). 대
+>     신 수동 `useEffect` 래퍼로 스크립트 주입 + `CKEDITOR.replace` + StrictMode 안전한 정리.
+> -   `mendixlink` 플러그인은 구 Dojo 위젯의 `plugin.js`/`dialogs`를 거의 그대로 포팅 (단 신규 `data-mf` wire 형식).
+>
+> 아래 본문은 `react-ver`(CKEditor 5) 기준 번역이므로, CKEditor 5 관련 서술(`shiftEnterMode`, `codeBlock`, `WordCount`,
+> 밸룬 UI, 4.8MB 번들 등)은 이 브랜치에 해당하지 않습니다.
 
 # CKEditor for Mendix — Dojo → Pluggable Widget 재작성
 

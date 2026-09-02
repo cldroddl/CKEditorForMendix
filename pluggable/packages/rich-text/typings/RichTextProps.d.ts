@@ -30,12 +30,10 @@ export interface RichTextContainerProps {
     customToolbar: string;
     enterMode: EnterModeEnum;
     spellChecker: boolean;
-    codeBlock: boolean;
     editorBodyClass: string;
     minHeight: number;
     maxHeight: number;
-    showCount: boolean;
-    maxCount: number;
+    editorScriptUrl: string;
     microflowLinks: MicroflowLinksType[];
 }
 
@@ -50,11 +48,9 @@ export interface RichTextPreviewProps {
     customToolbar: string;
     enterMode: EnterModeEnum;
     spellChecker: boolean;
-    codeBlock: boolean;
     editorBodyClass: string;
     minHeight: number | null;
     maxHeight: number | null;
-    showCount: boolean;
-    maxCount: number | null;
+    editorScriptUrl: string;
     microflowLinks: MicroflowLinksPreviewType[];
 }

@@ -2,6 +2,7 @@ import { ReactElement, useCallback, useRef } from "react";
 import { ValueStatus } from "mendix";
 import { RichTextContainerProps } from "../typings/RichTextProps";
 import { Editor } from "./components/Editor";
+import { DEFAULT_CKEDITOR_URL } from "./ckeditor4/loadCKEditor";
 
 import "./ui/RichText.css";
 
@@ -40,16 +41,15 @@ export function RichText(props: RichTextContainerProps): ReactElement | null {
         <Editor
             value={content.value ?? ""}
             disabled={content.readOnly}
+            scriptUrl={props.editorScriptUrl?.trim() || DEFAULT_CKEDITOR_URL}
             preset={props.preset}
             customToolbar={props.customToolbar}
             enterMode={props.enterMode}
             spellChecker={props.spellChecker}
-            codeBlock={props.codeBlock}
             minHeight={props.minHeight}
             maxHeight={props.maxHeight}
             editorBodyClass={props.editorBodyClass}
-            showCount={props.showCount}
-            maxCount={props.maxCount}
+            maxCount={0}
             links={microflowLinks.map(l => ({ name: l.linkName }))}
             onChange={commit}
             onBlur={html => {

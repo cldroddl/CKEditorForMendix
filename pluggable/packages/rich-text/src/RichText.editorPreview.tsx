@@ -25,7 +25,7 @@ export function preview(props: RichTextPreviewProps): ReactElement {
                     marginBottom: 6
                 }}
             >
-                Rich Text — {props.preset} toolbar
+                Rich Text (CKEditor 4) — {props.preset} toolbar
                 {props.microflowLinks.length ? ` · ${props.microflowLinks.length} microflow link(s)` : ""}
             </div>
             <div

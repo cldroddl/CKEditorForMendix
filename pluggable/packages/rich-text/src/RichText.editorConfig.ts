@@ -25,9 +25,6 @@ export function getProperties(values: RichTextPreviewProps, defaultProperties: P
     if (values.preset !== "custom") {
         hideProperty(defaultProperties, "customToolbar");
     }
-    if (!values.showCount) {
-        hideProperty(defaultProperties, "maxCount");
-    }
     return defaultProperties;
 }
 
