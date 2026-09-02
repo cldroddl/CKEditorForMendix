@@ -16,6 +16,7 @@
     "gulp-util": "^3.0.7",
     "gulp-zip": "^3.2.0",
     "gulp-jsvalidate": "^3.0.0",
+    "jshint": "^2.13.6",
     "widgetbuilder-gulp-helper": "https://github.com/JelteMX/widgetbuilder-gulp-helper/archive/1.0.1.tar.gz",
     "yargs": "^6.0.0"
   },
@@ -29,6 +30,7 @@
   },
   "scripts": {
     "dev": "node ./node_modules/gulp/bin/gulp",
+    "lint": "jshint --config .jshintrc src/CKEditorForMendix/widget/CKEditorForMendix.js src/CKEditorForMendix/widget/CKEditorViewerForMendix.js",
     "build": "node ./node_modules/gulp/bin/gulp build",
     "version": "node ./node_modules/gulp/bin/gulp version",
     "icon": "node ./node_modules/gulp/bin/gulp icon",
