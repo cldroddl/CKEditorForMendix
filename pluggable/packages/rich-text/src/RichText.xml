@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="ckeditorformendix.richtext.RichText" pluginWidget="true" needsEntityContext="true" offlineCapable="false"
+    supportedPlatform="Web"
+    xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Rich Text (CKEditor)</name>
+    <description>WYSIWYG HTML editor with microflow-link support, built on CKEditor 5.</description>
+    <icon />
+    <properties>
+        <propertyGroup caption="General">
+            <propertyGroup caption="Data source">
+                <property key="content" type="attribute" required="true">
+                    <caption>Content attribute</caption>
+                    <description>String attribute holding the HTML.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="onChange" type="action" required="false">
+                    <caption>On change</caption>
+                    <description>Runs when the editor loses focus after the content changed.</description>
+                </property>
+                <property key="onKeyPress" type="action" required="false">
+                    <caption>On key press</caption>
+                    <description>Runs on key input inside the editor (debounced).</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Editor">
+                <property key="preset" type="enumeration" defaultValue="standard">
+                    <caption>Toolbar preset</caption>
+                    <description>Base set of toolbar buttons. Use "Custom" to define your own below.</description>
+                    <enumerationValues>
+                        <enumerationValue key="basic">Basic</enumerationValue>
+                        <enumerationValue key="standard">Standard</enumerationValue>
+                        <enumerationValue key="full">Full</enumerationValue>
+                        <enumerationValue key="custom">Custom</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="customToolbar" type="string" required="false">
+                    <caption>Custom toolbar</caption>
+                    <description>Comma-separated CKEditor 5 toolbar item names; used only when preset is "Custom". Use "|" for a separator.</description>
+                </property>
+                <property key="enterMode" type="enumeration" defaultValue="P">
+                    <caption>Enter mode</caption>
+                    <description>Element produced by Enter.</description>
+                    <enumerationValues>
+                        <enumerationValue key="P">Paragraph (P)</enumerationValue>
+                        <enumerationValue key="BR">Break line (BR)</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="spellChecker" type="boolean" defaultValue="true">
+                    <caption>Browser spell checker</caption>
+                    <description>Enable the native browser spell checker.</description>
+                </property>
+                <property key="codeBlock" type="boolean" defaultValue="false">
+                    <caption>Code blocks</caption>
+                    <description>Enable the code-block plugin.</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Dimensions">
+                <property key="editorBodyClass" type="string" required="false">
+                    <caption>Editing area CSS class</caption>
+                    <description>Class applied to the editable body, for content-styling parity.</description>
+                </property>
+                <property key="minHeight" type="integer" defaultValue="200">
+                    <caption>Min height (px)</caption>
+                    <description>0 = auto.</description>
+                </property>
+                <property key="maxHeight" type="integer" defaultValue="0">
+                    <caption>Max height (px)</caption>
+                    <description>0 = unlimited (auto-grow).</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Character count">
+                <property key="showCount" type="boolean" defaultValue="false">
+                    <caption>Show character count</caption>
+                    <description />
+                </property>
+                <property key="maxCount" type="integer" defaultValue="0">
+                    <caption>Max characters</caption>
+                    <description>0 = no limit. Soft limit — shows a warning, does not block input.</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Microflow links">
+            <property key="microflowLinks" type="object" isList="true" required="false">
+                <caption>Microflow links</caption>
+                <description>Named links an editor user can insert; each maps to an action executed by the viewer.</description>
+                <properties>
+                    <propertyGroup caption="Link">
+                        <property key="linkName" type="string" required="true">
+                            <caption>Link name</caption>
+                            <description>Shown in the editor's link picker and stored in the HTML (data-mf).</description>
+                        </property>
+                        <property key="linkAction" type="action" required="false">
+                            <caption>Action</caption>
+                            <description>Executed by the Rich Text Viewer when the link is clicked.</description>
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Common">
+            <systemProperty key="Label" />
+            <systemProperty key="Editability" />
+            <systemProperty key="Visibility" />
+            <systemProperty key="Name" />
+            <systemProperty key="TabIndex" />
+        </propertyGroup>
+    </properties>
+</widget>

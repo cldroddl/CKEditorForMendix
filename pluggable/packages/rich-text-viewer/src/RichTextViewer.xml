@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="ckeditorformendix.richtextviewer.RichTextViewer" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+    supportedPlatform="Web"
+    xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
+    <name>Rich Text Viewer (CKEditor)</name>
+    <description>Renders stored rich-text HTML and executes microflow links on click.</description>
+    <icon />
+    <properties>
+        <propertyGroup caption="General">
+            <propertyGroup caption="Data source">
+                <property key="content" type="attribute" required="true">
+                    <caption>Content attribute</caption>
+                    <description>String attribute holding the HTML.</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Appearance">
+                <property key="maxLines" type="integer" defaultValue="0">
+                    <caption>Max lines</caption>
+                    <description>Clamp the rendered text to this many lines (0 = no clamp).</description>
+                </property>
+                <property key="highlightCode" type="boolean" defaultValue="false">
+                    <caption>Highlight code blocks</caption>
+                    <description>Apply syntax highlighting to pre/code blocks (requires highlight.js on the page).</description>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Microflow links">
+            <property key="microflowLinks" type="object" isList="true" required="false">
+                <caption>Microflow links</caption>
+                <description>Maps each link name stored in the HTML to an action.</description>
+                <properties>
+                    <propertyGroup caption="Link">
+                        <property key="linkName" type="string" required="true">
+                            <caption>Link name</caption>
+                            <description>Must match the name used in the editor / stored in data-mf.</description>
+                        </property>
+                        <property key="linkAction" type="action" required="true">
+                            <caption>Action</caption>
+                            <description>Executed when a link with this name is clicked.</description>
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Common">
+            <systemProperty key="Visibility" />
+            <systemProperty key="Name" />
+        </propertyGroup>
+    </properties>
+</widget>

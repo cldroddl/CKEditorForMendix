@@ -1,0 +1,43 @@
+{
+    "name": "@ckeditorformendix/rich-text-viewer",
+    "widgetName": "RichTextViewer",
+    "version": "3.0.0",
+    "description": "Renders stored rich-text HTML for Mendix and executes microflow links on click.",
+    "copyright": "© Mendix Technology BV 2015-2026",
+    "license": "Apache-2.0",
+    "private": true,
+    "config": {
+        "projectPath": "../../tests/testProject",
+        "mendixHost": "http://localhost:8080",
+        "developmentPort": 3001
+    },
+    "mxpackage": {
+        "name": "RichTextViewer",
+        "type": "widget",
+        "mpkName": "ckeditorformendix.RichTextViewer.mpk"
+    },
+    "packagePath": "ckeditorformendix.richtextviewer",
+    "marketplace": {
+        "minimumMXVersion": "11.6.0",
+        "appNumber": 1715,
+        "appName": "CKEditor For Mendix"
+    },
+    "scripts": {
+        "start": "pluggable-widgets-tools start:web",
+        "build": "pluggable-widgets-tools build:web",
+        "lint": "pluggable-widgets-tools lint",
+        "test": "pluggable-widgets-tools test:unit --passWithNoTests",
+        "release": "pluggable-widgets-tools release:web"
+    },
+    "dependencies": {
+        "@ckeditorformendix/shared": "3.0.0",
+        "classnames": "^2.5.1"
+    },
+    "devDependencies": {
+        "@mendix/pluggable-widgets-tools": ">=11.6.0 <11.13.0"
+    },
+    "peerDependencies": {
+        "react": "*",
+        "react-dom": "*"
+    }
+}

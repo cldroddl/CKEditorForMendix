@@ -1,0 +1,45 @@
+{
+    "name": "@ckeditorformendix/rich-text",
+    "widgetName": "RichText",
+    "version": "3.0.0",
+    "description": "WYSIWYG rich-text editor for Mendix, built on CKEditor 5, with microflow-link support.",
+    "copyright": "© Mendix Technology BV 2015-2026",
+    "license": "GPL-2.0-or-later",
+    "private": true,
+    "config": {
+        "projectPath": "../../tests/testProject",
+        "mendixHost": "http://localhost:8080",
+        "developmentPort": 3000
+    },
+    "mxpackage": {
+        "name": "RichText",
+        "type": "widget",
+        "mpkName": "ckeditorformendix.RichText.mpk"
+    },
+    "packagePath": "ckeditorformendix.richtext",
+    "marketplace": {
+        "minimumMXVersion": "11.6.0",
+        "appNumber": 1715,
+        "appName": "CKEditor For Mendix"
+    },
+    "scripts": {
+        "start": "pluggable-widgets-tools start:web",
+        "build": "pluggable-widgets-tools build:web",
+        "lint": "pluggable-widgets-tools lint",
+        "test": "pluggable-widgets-tools test:unit --passWithNoTests",
+        "release": "pluggable-widgets-tools release:web"
+    },
+    "dependencies": {
+        "@ckeditor/ckeditor5-react": "^11.2.0",
+        "@ckeditorformendix/shared": "3.0.0",
+        "ckeditor5": "^48.5.0",
+        "classnames": "^2.5.1"
+    },
+    "devDependencies": {
+        "@mendix/pluggable-widgets-tools": ">=11.6.0 <11.13.0"
+    },
+    "peerDependencies": {
+        "react": "*",
+        "react-dom": "*"
+    }
+}

@@ -1,0 +1,8 @@
+.mx-microflow-link {
+    cursor: pointer;
+}
+
+.mx-microflow-link--unbound {
+    cursor: not-allowed;
+    opacity: 0.6;
+}

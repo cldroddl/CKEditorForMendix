@@ -1,0 +1,23 @@
+{
+    "name": "ckeditorformendix-workspace",
+    "version": "3.0.0",
+    "private": true,
+    "description": "React + CKEditor 5 rewrite of the CKEditor for Mendix Dojo widgets",
+    "license": "Apache-2.0",
+    "workspaces": [
+        "packages/shared",
+        "packages/rich-text",
+        "packages/rich-text-viewer"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "npm run build --workspaces --if-present",
+        "dev:editor": "npm run start --workspace @ckeditorformendix/rich-text",
+        "dev:viewer": "npm run start --workspace @ckeditorformendix/rich-text-viewer",
+        "release": "npm run release --workspaces --if-present",
+        "lint": "npm run lint --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present"
+    }
+}

@@ -1,0 +1,25 @@
+.rt-editor .ck-editor__editable {
+    min-height: var(--ck-min-height, 200px);
+}
+
+.rt-editor .ck-editor__editable_inline {
+    max-height: var(--ck-max-height, none);
+    overflow-y: auto;
+}
+
+.rt-count {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-text-secondary, #6c7180);
+    text-align: right;
+}
+
+.rt-count.rt-count--over {
+    color: var(--color-alert, #e33f4e);
+    font-weight: 600;
+}
+
+/* Microflow-link styling parity with the legacy widget */
+.rt-editor a.mx-microflow-link {
+    cursor: pointer;
+}
