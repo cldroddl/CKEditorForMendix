@@ -38,11 +38,39 @@ npm run dev:viewer       # …for the viewer widget
 
 Widget `.mpk` output lands in `packages/<widget>/dist/<version>/`.
 
-### Dev server / test project
+### Testing in a Mendix app
 
-`packages/*/package.json` → `config.projectPath` points at `../../tests/testProject`, which is not committed. To use
-`npm run dev:*`, create a Mendix test app there (or change the path) — it is only needed for the live-reload dev server,
-not for `build`.
+pwt has no test-project auto-provisioning — create the app yourself. `packages/*/package.json` →
+`config.projectPath` points at `../../tests/testProject` (gitignored). If a Mendix project exists there, `npm run dev:*`
+copies the built widget into it and live-reloads; `build` does not need it.
+
+**1. Create the app** — Mendix Studio Pro **11.6+** (React client + React 19; older versions show the widgets as
+"cannot be used"). New app → _Blank Web App_ → save at `pluggable/tests/testProject/` (or elsewhere + edit
+`config.projectPath`).
+
+**2. Domain model + page**
+
+-   Persistable entity `Test` with attribute `Content` (String, unlimited).
+-   Microflow `ACT_Open`: Create `Test` → Show page `Home_Web` with it as context. Set as the app's home / a button.
+-   `Home_Web`: a Data view (context `Test`) containing the **Rich Text (CKEditor)** widget, `Content attribute` bound to
+    `Test.Content`. Add the **Rich Text Viewer (CKEditor)** below it, bound to the same attribute, to see the round trip.
+-   Both widgets are `needsEntityContext="true"` — they must sit inside a Data view / List view, never on a bare page.
+
+**3. Microflow links** — nanoflows `NF_Alpha`, `NF_Beta` (each: Show message). On **Rich Text** → _Microflow links_ add
+`{ Link Name: "Alpha" }`. On **Rich Text Viewer** → _Microflow links_ add `{ Link Name: "Alpha", Microflow Name: NF_Alpha }`.
+To exercise the multi-instance fix, drop a second Rich Text in the same Data view with a different list (`"Beta"`) and
+confirm each editor's "Insert a Mendix microflow link" dialog shows its own list.
+
+**4. Get the widgets in** — either:
+
+-   `cd pluggable && npm run dev:editor` (and/or `dev:viewer`) — with `config.projectPath` set, pwt copies the build to
+    `tests/testProject/deployment/web/widgets/` + `tests/testProject/widgets/` and watches for changes, **or**
+-   `npm run build`, then copy `packages/*/dist/<version>/*.mpk` into `<project>/widgets/` and in Studio Pro:
+    right-click the app → **Update widgets**.
+
+**5. Run** — F5 in Studio Pro (App Settings → Runtime → _React client_ enabled, the 11.x default).
+
+Do **not** reuse the legacy `../test/Test.mpr` — it is a Mendix 7 project, incompatible with these widgets.
 
 ## Status
 
@@ -95,11 +123,38 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
 `npm run build` / `npm install`(`prepare` 스크립트)이 이를 처리합니다.
 위젯 `.mpk` 출력물은 `packages/<widget>/dist/<version>/`에 생성됩니다.
 
-### 개발 서버 / 테스트 프로젝트
+### Mendix 앱에서 테스트하기
 
-`packages/*/package.json`의 `config.projectPath`가 커밋되지 않은 `../../tests/testProject`를 가리킵니다.
-`npm run dev:*`를 쓰려면 그 위치에 Mendix 테스트 앱을 만들거나 경로를 바꾸세요.
-라이브 리로드 개발 서버에만 필요하고 `build`에는 불필요합니다.
+pwt에는 테스트 프로젝트 자동 생성 기능이 없어서 직접 만들어야 합니다. `packages/*/package.json`의
+`config.projectPath`가 `../../tests/testProject`(gitignore됨)를 가리킵니다. 거기에 Mendix 프로젝트가 있으면
+`npm run dev:*`가 빌드된 위젯을 복사하고 라이브 리로드합니다. `build`에는 불필요합니다.
+
+**1. 앱 생성** — Mendix Studio Pro **11.6 이상** (React 클라이언트 + React 19; 그 미만에서는 위젯이 "사용 불가"로
+표시됨). New app → _Blank Web App_ → `pluggable/tests/testProject/`에 저장 (다른 곳이면 `config.projectPath` 수정).
+
+**2. 도메인 모델 + 페이지**
+
+-   지속형 엔티티 `Test` + `Content` (String, unlimited)
+-   마이크로플로우 `ACT_Open`: `Test` 생성 → `Home_Web` 페이지를 컨텍스트와 함께 표시. 홈페이지 또는 버튼에 연결
+-   `Home_Web`: Data view(컨텍스트 `Test`) 안에 **Rich Text (CKEditor)** 위젯, `Content attribute` = `Test.Content`.
+    그 아래에 **Rich Text Viewer (CKEditor)**를 같은 attribute에 바인딩해 왕복 확인
+-   두 위젯 모두 `needsEntityContext="true"` — 반드시 Data view / List view 안에 배치 (빈 페이지 직접 배치 불가)
+
+**3. Microflow links** — 나노플로우 `NF_Alpha`, `NF_Beta` (각각 Show message). **Rich Text** → *Microflow links*에
+`{ Link Name: "Alpha" }` 추가, **Rich Text Viewer** → *Microflow links*에 `{ Link Name: "Alpha", Microflow Name: NF_Alpha }`
+추가. 다중 인스턴스 수정 확인: 같은 Data view에 Rich Text 하나 더 넣고 목록을 다르게(`"Beta"`) → 각 에디터의
+"Insert a Mendix microflow link" 다이얼로그가 자기 목록을 보여주는지 확인
+
+**4. 위젯 넣기** — 둘 중 하나:
+
+-   `cd pluggable && npm run dev:editor` (그리고/또는 `dev:viewer`) — `config.projectPath` 설정 시 pwt가 빌드본을
+    `tests/testProject/deployment/web/widgets/` + `tests/testProject/widgets/`로 복사하고 변경을 감시, **또는**
+-   `npm run build` 후 `packages/*/dist/<version>/*.mpk`를 `<project>/widgets/`에 복사 → Studio Pro에서 앱 우클릭 →
+    **Update widgets**
+
+**5. 실행** — Studio Pro에서 F5 (App Settings → Runtime → _React client_ 활성, 11.x 기본값)
+
+레거시 `../test/Test.mpr`는 **재사용 금지** — Mendix 7 프로젝트라 이 위젯과 호환되지 않습니다.
 
 ## 현재 상태
 
