@@ -2,7 +2,7 @@ import { ReactElement, useCallback, useRef } from "react";
 import { ValueStatus } from "mendix";
 import { RichTextContainerProps } from "../typings/RichTextProps";
 import { Editor } from "./components/Editor";
-import { DEFAULT_CKEDITOR_URL } from "./ckeditor4/loadCKEditor";
+import { getBundledCKEditorUrl } from "./ckeditor4/loadCKEditor";
 
 import "./ui/RichText.css";
 
@@ -47,7 +47,7 @@ export function RichText(props: RichTextContainerProps): ReactElement | null {
         <Editor
             value={messageString.value ?? ""}
             disabled={messageString.readOnly}
-            scriptUrl={props.editorScriptUrl?.trim() || DEFAULT_CKEDITOR_URL}
+            scriptUrl={props.editorScriptUrl?.trim() || getBundledCKEditorUrl()}
             label={label || undefined}
             toolbarDocument={props.toolbarDocument}
             toolbarClipboard={props.toolbarClipboard}

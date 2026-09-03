@@ -4,14 +4,24 @@
  * its own plugins/skins/lang relative to `CKEDITOR.basePath`, so it must be
  * loaded as an external script rather than bundled.
  *
- * Default URL is the "full-all" preset of the last open-source (LGPL/MPL) build,
- * 4.22.0, from the CKEditor CDN — matching the legacy widget's vendored build
- * (`preset: 'full'` + extras). For offline apps or to avoid the external request,
- * host a full CKEditor 4.22.0 build inside your Mendix app
- * (e.g. `theme/web/ckeditor/`) and point the widget's "Editor script URL" at it.
+ * By default the widget loads the CKEditor 4.22.0 runtime that its own build
+ * copied into `assets/ckeditor/` (see `rollup.config.mjs`) — served from the app
+ * itself, no external request, works offline (the legacy Dojo widget vendored
+ * CKEditor the same way). The widget's "Editor script URL" property overrides
+ * this with any other CKEditor 4.22.0 build (e.g. the CDN or a shared copy).
  */
 
-export const DEFAULT_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js";
+interface MxRuntime {
+    remoteUrl?: string;
+    appUrl?: string;
+}
+
+/** Absolute URL of the CKEditor build bundled into this widget's assets. */
+export function getBundledCKEditorUrl(): string {
+    const mx = (window as unknown as { mx?: MxRuntime }).mx;
+    const root = (mx?.remoteUrl ?? mx?.appUrl ?? "/").replace(/\/?$/, "/");
+    return `${root}widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js`;
+}
 
 interface CKEditorGlobal {
     replace(el: HTMLElement | string, config?: Record<string, unknown>): CKEditorInstance | null;
@@ -63,7 +73,7 @@ function warnUrlMismatch(url: string): void {
     }
 }
 
-export function loadCKEditor(url: string = DEFAULT_CKEDITOR_URL): Promise<CKEditorGlobal> {
+export function loadCKEditor(url: string = getBundledCKEditorUrl()): Promise<CKEditorGlobal> {
     if (window.CKEDITOR) {
         warnUrlMismatch(url);
         return Promise.resolve(window.CKEDITOR);
