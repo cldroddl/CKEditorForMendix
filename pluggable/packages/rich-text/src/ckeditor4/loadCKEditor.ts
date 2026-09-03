@@ -51,16 +51,25 @@ declare global {
 let pending: Promise<CKEditorGlobal> | null = null;
 let loadedFrom: string | null = null;
 
+function warnUrlMismatch(url: string): void {
+    if (loadedFrom && loadedFrom !== url) {
+        // CKEditor 4 is a page-global singleton — one <script> per page. A RichText widget
+        // configured with a different "Editor script URL" cannot get its own build.
+        // eslint-disable-next-line no-console
+        console.error(
+            `CKEditor 4 is already loaded from ${loadedFrom}. Ignoring ${url} — all RichText widgets ` +
+                `on a page share one CKEditor build. Set the same "Editor script URL" on every RichText widget.`
+        );
+    }
+}
+
 export function loadCKEditor(url: string = DEFAULT_CKEDITOR_URL): Promise<CKEditorGlobal> {
     if (window.CKEDITOR) {
+        warnUrlMismatch(url);
         return Promise.resolve(window.CKEDITOR);
     }
     if (pending) {
-        if (loadedFrom && loadedFrom !== url) {
-            // CKEditor 4 is a global singleton — a second URL cannot be honoured.
-            // eslint-disable-next-line no-console
-            console.warn(`CKEditor 4 already loading from ${loadedFrom}; ignoring ${url}`);
-        }
+        warnUrlMismatch(url);
         return pending;
     }
 

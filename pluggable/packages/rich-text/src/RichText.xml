@@ -287,7 +287,7 @@
         <propertyGroup caption="Advanced">
             <property key="editorScriptUrl" type="string" required="false">
                 <caption>Editor script URL</caption>
-                <description>URL of a self-hosted CKEditor 4.22.0 "full-all" ckeditor.js. Leave empty to load 4.22.0 from the CKEditor CDN. Host it inside your app (e.g. theme/web/ckeditor/ckeditor.js) for offline / no-external-request deployments. (Not present in the legacy widget, which vendored CKEditor.)</description>
+                <description>URL of a self-hosted CKEditor 4.22.0 "full-all" ckeditor.js. Leave empty to load 4.22.0 from the CKEditor CDN. Host it inside your app (e.g. theme/web/ckeditor/ckeditor.js) for offline / no-external-request deployments. This value is page-global: all RichText widgets on one page load a single CKEditor build (the first widget to load wins), so set the same value on every RichText widget on a page. (Not present in the legacy widget, which vendored CKEditor.)</description>
             </property>
         </propertyGroup>
         <propertyGroup caption="Common">

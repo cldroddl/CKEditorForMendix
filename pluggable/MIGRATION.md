@@ -48,6 +48,21 @@ paid/commercial.
 -   **Not ported yet:** `oembed` / media embed (needs jQuery + a hosted `libs/`), image **upload** (`uploadimage` /
     `simple-image-browser`). `imagePasteMode="upload"` + `imageUploadMicroflow` are accepted in the XML but inert.
 
+### Multiple widgets per page
+
+Supported. CKEditor 4 is designed for many editors on one page: `CKEDITOR.replace` on the nameless host `<div>` gets an
+auto-unique `editor{n}` name, config is passed per-instance (never via the global `CKEDITOR.config`), plugin
+registration (`mendixlink`, `pastebase64`) is idempotent, and unmount cleanup targets only its own `instance.name`.
+The `RichTextViewer` never loads `ckeditor.js` at all, so any mix of editors + viewers coexists.
+
+The **one constraint**: `ckeditor.js` loads exactly once per page. If two `RichText` widgets set **different**
+`editorScriptUrl` values, the first to load wins and the second is ignored (with a `console.error`). Use the same
+value on every RichText widget on a page.
+
+The `mendixlink` dialog is registered with the editor CKEditor passes at open time (`mendixLinkPlugin.ts` —
+`dialog.add("mendixLinkDialog", dialogEditor => buildDialog(dialogEditor))`), so each editor's "Insert Mendix link"
+dialog reads its own configured link list even with several editors on the page.
+
 ## Widgets
 
 Two pluggable widgets ship from one package (`CKEditorForMendix` client module):

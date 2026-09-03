@@ -51,7 +51,11 @@ export function registerMendixLinkPlugin(): void {
                 });
             }
 
-            CKEDITOR.dialog.add("mendixLinkDialog", () => buildDialog(editor));
+            // Bind to the editor CKEditor passes at open time, NOT `init`'s `editor`:
+            // dialog.add(name, fn) overwrites the page-global definition on every init, so with
+            // 2+ RichText widgets a closure over `init`'s editor would make every dialog operate
+            // on the last-mounted editor.
+            CKEDITOR.dialog.add("mendixLinkDialog", (dialogEditor: any) => buildDialog(dialogEditor));
         }
     });
 }
