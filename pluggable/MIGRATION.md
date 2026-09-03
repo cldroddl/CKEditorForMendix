@@ -19,12 +19,14 @@ paid/commercial.
 
 ## Target stack
 
-| Tool                              | Version                                                            |
-| --------------------------------- | ------------------------------------------------------------------ |
-| React                             | ≥ 19 (peer, provided by the Mendix client — Mendix 11)             |
-| `@mendix/pluggable-widgets-tools` | 11.12 (same as `react-ver`)                                        |
-| TypeScript                        | as bundled with pluggable-widgets-tools 11                         |
-| Editor                            | **CKEditor 4.22.0** ("full-all"), loaded at runtime via `<script>` |
+| Tool                                        | Version                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| React                                       | ≥ 19 (peer, provided by the Mendix client — Mendix 11)             |
+| `@mendix/pluggable-widgets-tools` (**pwt**) | 11.12 (same as `react-ver`)                                        |
+| TypeScript                                  | as bundled with pwt 11                                             |
+| Editor                                      | **CKEditor 4.22.0** ("full-all"), loaded at runtime via `<script>` |
+
+("pwt" = `@mendix/pluggable-widgets-tools`, Mendix's widget build toolchain — used throughout this doc.)
 
 ### Editor loading (this branch)
 
@@ -245,17 +247,18 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 
 # CKEditor for Mendix — Dojo → Pluggable Widget 재작성
 
-브랜치: `react-ver`. 이 디렉터리(`pluggable/`)는 `@mendix/pluggable-widgets-tools`로 빌드하는 새 React + TypeScript
-pluggable 위젯을 담고 있습니다. 구 Dojo 위젯(`../src/`)은 기능 동등성(parity)에 도달할 때까지 참고용으로 남겨 둡니다.
+브랜치: `react-ver`. 이 디렉터리(`pluggable/`)는 `@mendix/pluggable-widgets-tools`(이하 **pwt** — Mendix의 위젯 빌드
+툴체인, 이 문서 전체에서 이 약자로 지칭)로 빌드하는 새 React + TypeScript pluggable 위젯을 담고 있습니다. 구 Dojo
+위젯(`../src/`)은 기능 동등성(parity)에 도달할 때까지 참고용으로 남겨 둡니다.
 
 ## 목표 스택
 
-| 도구                              | 버전                                                                    |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| React                             | ≥ 19 (peer, Mendix 클라이언트가 제공 — Mendix 11)                       |
-| `@mendix/pluggable-widgets-tools` | ≥ 9, **11.x 권장**                                                      |
-| TypeScript                        | pluggable-widgets-tools 11에 번들된 버전                                |
-| 에디터                            | CKEditor 5 (`ckeditor5` + `@ckeditor/ckeditor5-react`), GPL 라이선스 키 |
+| 도구                                    | 버전                                                                    |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| React                                   | ≥ 19 (peer, Mendix 클라이언트가 제공 — Mendix 11)                       |
+| `@mendix/pluggable-widgets-tools` (pwt) | ≥ 9, **11.x 권장**                                                      |
+| TypeScript                              | pwt 11에 번들된 버전                                                    |
+| 에디터                                  | CKEditor 5 (`ckeditor5` + `@ckeditor/ckeditor5-react`), GPL 라이선스 키 |
 
 ## 위젯
 

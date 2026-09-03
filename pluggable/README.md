@@ -40,9 +40,10 @@ Widget `.mpk` output lands in `packages/<widget>/dist/<version>/`.
 
 ### Testing in a Mendix app
 
-pwt has no test-project auto-provisioning — create the app yourself. `packages/*/package.json` →
-`config.projectPath` points at `../../tests/testProject` (gitignored). If a Mendix project exists there, `npm run dev:*`
-copies the built widget into it and live-reloads; `build` does not need it.
+`@mendix/pluggable-widgets-tools` (**pwt**) — the widget build toolchain used by every `npm run` script here — has no
+test-project auto-provisioning; create the app yourself. `packages/*/package.json` → `config.projectPath` points at
+`../../tests/testProject` (gitignored). If a Mendix project exists there, `npm run dev:*` copies the built widget into
+it and live-reloads; `build` does not need it.
 
 **1. Create the app** — Mendix Studio Pro **11.6+** (React client + React 19; older versions show the widgets as
 "cannot be used"). New app → _Blank Web App_ → save at `pluggable/tests/testProject/` (or elsewhere + edit
@@ -125,9 +126,10 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
 
 ### Mendix 앱에서 테스트하기
 
-pwt에는 테스트 프로젝트 자동 생성 기능이 없어서 직접 만들어야 합니다. `packages/*/package.json`의
-`config.projectPath`가 `../../tests/testProject`(gitignore됨)를 가리킵니다. 거기에 Mendix 프로젝트가 있으면
-`npm run dev:*`가 빌드된 위젯을 복사하고 라이브 리로드합니다. `build`에는 불필요합니다.
+`@mendix/pluggable-widgets-tools`(이하 **pwt**) — 여기의 모든 `npm run` 스크립트가 쓰는 위젯 빌드 툴체인 — 에는
+테스트 프로젝트 자동 생성 기능이 없어서 직접 만들어야 합니다. `packages/*/package.json`의 `config.projectPath`가
+`../../tests/testProject`(gitignore됨)를 가리킵니다. 거기에 Mendix 프로젝트가 있으면 `npm run dev:*`가 빌드된
+위젯을 복사하고 라이브 리로드합니다. `build`에는 불필요합니다.
 
 **1. 앱 생성** — Mendix Studio Pro **11.6 이상** (React 클라이언트 + React 19; 그 미만에서는 위젯이 "사용 불가"로
 표시됨). New app → _Blank Web App_ → `pluggable/tests/testProject/`에 저장 (다른 곳이면 `config.projectPath` 수정).
