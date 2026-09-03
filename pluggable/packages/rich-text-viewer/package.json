@@ -16,7 +16,7 @@
         "type": "widget",
         "mpkName": "ckeditorformendix.RichTextViewer.mpk"
     },
-    "packagePath": "ckeditorformendix.richtextviewer",
+    "packagePath": "ckeditorformendix",
     "marketplace": {
         "minimumMXVersion": "11.6.0",
         "appNumber": 1715,
