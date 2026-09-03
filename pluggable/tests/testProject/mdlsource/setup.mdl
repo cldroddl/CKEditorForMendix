@@ -1,0 +1,116 @@
+-- CKEditor for Mendix — widget test scaffold for testProject
+-- Mirrors the hand-built structure in ../myTestProject:
+--   * MyFirstModule.Test entity with a single Content: String(unlimited)
+--   * MyFirstModule.DS_Test() microflow — creates a Test, returns it
+--   * MyFirstModule.NAV_LinkClicked() nanoflow — target for a viewer microflow link
+--   * MyFirstModule.TestPage_Web — layoutgrid > column > two DataViews:
+--       dataView1 (DS_Test): RichText editorA + RichTextViewer viewer1
+--       dataView2 (DS_Test): RichText editorB
+--     (each editor binds Content of its own DataView)
+--   * Navigation: home = Home_Web, menu item "CKEditor test" -> TestPage_Web
+--
+-- ─── Microflow links — set these BY HAND in Studio Pro ────────────────────────
+-- mxcli v0.16.0 cannot write widget object-list properties: a `microflowlink`
+-- (or `customtoolbar`) block inside a `pluggablewidget` is rejected by the MDL
+-- parser in both `check` and `exec` (it is only emitted by DESCRIBE, one-way).
+-- When mxcli places these widgets it also auto-seeds one empty `microflowLinks`
+-- row, which trips the editorConfig "Link Name is required" check at runtime.
+--
+-- After running this script, open the app in Studio Pro and, on TestPage_Web:
+--   * editorA  — open "Microflow links", DELETE the auto-seeded empty row.
+--                Leave the list empty. (This is the "removed the microflow link"
+--                fix.)
+--   * editorB  — "Microflow links": one row, Link Name = "Beta". (This is the
+--                "entered a Link Name" fix — the editor list only needs a name;
+--                it just makes "Beta" insertable via the Mendix-link dialog.)
+--   * viewer1  — "Microflow links": one row, Link Name = "Beta",
+--                Microflow = MyFirstModule.NAV_LinkClicked. The viewer row needs
+--                BOTH a name and a microflow; it is what actually resolves a
+--                "Beta" link clicked in rendered content.
+-- To skip the microflow-link feature entirely: delete the auto-seeded row from
+-- all three widgets and ignore NAV_LinkClicked.
+--
+-- NOTE: mxcli places pluggable widgets without Studio Pro's full template BSON,
+-- so `mx check` reports CE0463 ("widget definition changed") on the three
+-- widgets. Fix once in Studio Pro: App menu -> Update all widgets. Studio-Pro-
+-- placed widgets (as in myTestProject) don't have this.
+
+/**
+ * Holds the rich-text HTML edited/viewed by the CKEditor widgets.
+ */
+create or modify persistent entity MyFirstModule.Test (
+  Content: String(unlimited)
+);
+/
+
+create or modify microflow MyFirstModule.DS_Test ()
+returns MyFirstModule.Test as $Result
+begin
+  $Result = create MyFirstModule.Test;
+  return $Result;
+end;
+/
+
+/**
+ * Target for viewer1's "Beta" microflow link. Client-side, no parameters — the
+ * viewer calls it with mfName.execute() when a mx-microflow-link is clicked.
+ * mxcli MDL has no "Show message" activity, so this logs to the browser console;
+ * swap in a Show message / Show page in Studio Pro to make the click louder.
+ */
+create or modify nanoflow MyFirstModule.NAV_LinkClicked ()
+begin
+  log info 'Microflow link clicked (test scaffold).';
+end;
+/
+
+create or replace page MyFirstModule.TestPage_Web
+(
+  title: 'CKEditor widget test',
+  layout: Atlas_Core.Atlas_Default
+)
+{
+  layoutgrid grid (DesignProperties: ['Row gap': 'Large']) {
+    row rowIntro {
+      column colIntro (DesktopWidth: AutoFill) {
+        dynamictext intro (Content: 'CKEditor for Mendix — widget test', RenderMode: H1)
+      }
+    }
+    row rowEditors {
+      column colEditors (DesktopWidth: AutoFill) {
+        dataview dataView1 (DataSource: microflow MyFirstModule.DS_Test) {
+          pluggablewidget 'ckeditorformendix.richtext.RichText' editorA (
+            messageString: Content,
+            showLabel: true
+          )
+          pluggablewidget 'ckeditorformendix.richtextviewer.RichTextViewer' viewer1 (
+            messageString: Content
+          )
+        }
+        dataview dataView2 (DataSource: microflow MyFirstModule.DS_Test) {
+          pluggablewidget 'ckeditorformendix.richtext.RichText' editorB (
+            messageString: Content
+          )
+        }
+      }
+    }
+  }
+}
+/
+
+grant view on page MyFirstModule.TestPage_Web to MyFirstModule.User;
+/
+grant execute on microflow MyFirstModule.DS_Test to MyFirstModule.User;
+/
+grant execute on nanoflow MyFirstModule.NAV_LinkClicked to MyFirstModule.User;
+/
+grant MyFirstModule.User on MyFirstModule.Test (create, delete, read *, write *);
+/
+
+create or replace navigation Responsive
+  home page MyFirstModule.Home_Web
+  menu (
+    menu item 'Home' page MyFirstModule.Home_Web;
+    menu item 'CKEditor test' page MyFirstModule.TestPage_Web;
+  )
+;
+/

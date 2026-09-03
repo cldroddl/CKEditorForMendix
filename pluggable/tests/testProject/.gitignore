@@ -1,0 +1,38 @@
+# Mendix project
+/**/node_modules/
+!/javascriptsource/**/node_modules/
+/*.launch
+/.classpath
+/.mendix-cache/
+/.project
+/deployment/
+/javasource/*/proxies/
+/javasource/system/
+/modeler-merge-marker
+/nativemobile/builds/
+/packages/
+/project-settings.user.json
+/releases/
+/theme-cache/
+*.mpr.lock
+*.mpr.bak
+/vendorlib/temp/
+/.svn/
+
+# MPR v2 journal files
+/mprcontents/mprjournal*
+
+# OS
+.DS_Store
+
+# mxcli + local AI tooling — regenerate with `mxcli init .` in this folder
+mxcli
+mxcli.exe
+.mxcli/
+/.ai-context/
+/.claude/
+/.devcontainer/
+/.playwright/
+/skillssource/
+/AGENTS.md
+/CLAUDE.md
