@@ -7,50 +7,80 @@ import { DEFAULT_CKEDITOR_URL } from "./ckeditor4/loadCKEditor";
 import "./ui/RichText.css";
 
 export function RichText(props: RichTextContainerProps): ReactElement | null {
-    const { content, onChange, onKeyPress, microflowLinks } = props;
+    const { messageString, onChangeMicroflow, onKeyPressMicroflow, microflowLinks } = props;
     const keyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const commit = useCallback(
         (html: string) => {
-            if (content.status === ValueStatus.Available && !content.readOnly && html !== content.value) {
-                content.setValue(html);
+            if (
+                messageString.status === ValueStatus.Available &&
+                !messageString.readOnly &&
+                html !== messageString.value
+            ) {
+                messageString.setValue(html);
             }
         },
-        [content]
+        [messageString]
     );
 
     const fireChange = useCallback(() => {
-        if (onChange?.canExecute) {
-            onChange.execute();
+        if (onChangeMicroflow?.canExecute) {
+            onChangeMicroflow.execute();
         }
-    }, [onChange]);
+    }, [onChangeMicroflow]);
 
     const fireKey = useCallback(() => {
-        if (!onKeyPress?.canExecute) {
+        if (!onKeyPressMicroflow?.canExecute) {
             return;
         }
         clearTimeout(keyTimer.current);
-        keyTimer.current = setTimeout(() => onKeyPress.execute(), 250);
-    }, [onKeyPress]);
+        keyTimer.current = setTimeout(() => onKeyPressMicroflow.execute(), 250);
+    }, [onKeyPressMicroflow]);
 
-    if (content.status === ValueStatus.Loading) {
+    if (messageString.status === ValueStatus.Loading) {
         return null;
     }
 
+    const label = props.showLabel ? props.fieldCaption?.value : undefined;
+
     return (
         <Editor
-            value={content.value ?? ""}
-            disabled={content.readOnly}
+            value={messageString.value ?? ""}
+            disabled={messageString.readOnly}
             scriptUrl={props.editorScriptUrl?.trim() || DEFAULT_CKEDITOR_URL}
-            preset={props.preset}
-            customToolbar={props.customToolbar}
+            label={label || undefined}
+            toolbarDocument={props.toolbarDocument}
+            toolbarClipboard={props.toolbarClipboard}
+            toolbarEditing={props.toolbarEditing}
+            toolbarForms={props.toolbarForms}
+            toolbarSeperator1={props.toolbarSeperator1}
+            toolbarBasicstyles={props.toolbarBasicstyles}
+            toolbarParagraph={props.toolbarParagraph}
+            toolbarLinks={props.toolbarLinks}
+            toolbarInsert={props.toolbarInsert}
+            toolbarSeperator2={props.toolbarSeperator2}
+            toolbarStyles={props.toolbarStyles}
+            toolbarColors={props.toolbarColors}
+            toolbarTools={props.toolbarTools}
+            toolbarOthers={props.toolbarOthers}
+            useCustomToolbar={props.useCustomToolbar}
+            customToolbars={props.customToolbars}
             enterMode={props.enterMode}
-            spellChecker={props.spellChecker}
-            minHeight={props.minHeight}
-            maxHeight={props.maxHeight}
-            editorBodyClass={props.editorBodyClass}
-            maxCount={0}
-            links={microflowLinks.map(l => ({ name: l.linkName }))}
+            shiftEnterMode={props.shiftEnterMode}
+            autoParagraph={props.autoParagraph}
+            enableSpellCheck={props.enableSpellCheck}
+            bodyCssClass={props.bodyCssClass}
+            width={props.width}
+            height={props.height}
+            maximizeOffset={props.maximizeOffset}
+            showStatusBar={props.showStatusBar}
+            showToolbarCollapsed={props.showToolbarCollapsed}
+            enableCodeHighlighting={props.enableCodeHighlighting}
+            imagePasteMode={props.imagePasteMode}
+            useImageStyleProperty={props.useImageStyleProperty}
+            countPlugin={props.countPlugin}
+            countPluginMaxCount={props.countPluginMaxCount}
+            links={microflowLinks.map(l => ({ name: l.functionNames }))}
             onChange={commit}
             onBlur={html => {
                 commit(html);

@@ -7,8 +7,8 @@ Why: CKEditor 4.22.0 is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1, so it can be 
 licence key — unlike CKEditor 5 (GPL + mandatory key). Trade-off: CKEditor 4 open source is EOL since June 2023 (no
 security patches). See [`MIGRATION.md`](./MIGRATION.md) for the full rationale, property mapping, and wire format.
 
-The editor is **not bundled** — `ckeditor.js` (4.22.0 "standard-all") is loaded at runtime from
-`https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js` by default, or from the URL set in the widget's **Editor
+The editor is **not bundled** — `ckeditor.js` (4.22.0 "full-all") is loaded at runtime from
+`https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` by default, or from the URL set in the widget's **Editor
 script URL** property (host `node_modules/ckeditor4/` inside your app for offline use). `.mpk` is ~52 KB.
 
 ## Layout (npm workspaces)
@@ -67,8 +67,8 @@ shared 패키지·뷰어 위젯·워크스페이스·빌드 도구는 동일하�
 대가: CKEditor 4 오픈소스는 2023년 6월 EOL(보안 패치 없음).
 전체 근거·속성 매핑·wire 형식은 [`MIGRATION.md`](./MIGRATION.md) 참고.
 
-에디터는 **번들하지 않습니다** — `ckeditor.js`(4.22.0 "standard-all")를 런타임에 로드합니다.
-기본값은 `https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js`이고, 위젯의 **"Editor script URL"** 속성으로 변경할 수 있습니다.
+에디터는 **번들하지 않습니다** — `ckeditor.js`(4.22.0 "full-all")를 런타임에 로드합니다.
+기본값은 `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`이고, 위젯의 **"Editor script URL"** 속성으로 변경할 수 있습니다.
 오프라인 환경은 `node_modules/ckeditor4/`를 앱 안에 복사해 사용하세요. `.mpk`는 약 52KB입니다.
 
 ## 구성 (npm workspaces)

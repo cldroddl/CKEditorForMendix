@@ -9,16 +9,16 @@ interface Problem {
 export function check(values: RichTextViewerPreviewProps): Problem[] {
     const problems: Problem[] = [];
     values.microflowLinks.forEach((link, i) => {
-        if (!link.linkName?.trim()) {
+        if (!link.functionNames?.trim()) {
             problems.push({
-                property: `microflowLinks/${i + 1}/linkName`,
-                message: "Link name is required."
+                property: `microflowLinks/${i + 1}/functionNames`,
+                message: "Link Name is required."
             });
         }
-        if (!link.linkAction) {
+        if (!link.mfName) {
             problems.push({
-                property: `microflowLinks/${i + 1}/linkAction`,
-                message: `No action set for link "${link.linkName}"; clicks will do nothing.`,
+                property: `microflowLinks/${i + 1}/mfName`,
+                message: `No microflow set for link "${link.functionNames}"; clicks will do nothing.`,
                 severity: "warning"
             });
         }

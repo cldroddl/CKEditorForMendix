@@ -3,52 +3,46 @@
     supportedPlatform="Web"
     xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
-    <name>Rich Text Viewer (CKEditor)</name>
-    <description>Renders stored rich-text HTML and executes microflow links on click.</description>
+    <name>CKEditor viewer for Mendix</name>
+    <description>The CKEditor output viewer for Mendix. React rewrite.</description>
     <icon />
     <properties>
-        <propertyGroup caption="General">
-            <propertyGroup caption="Data source">
-                <property key="content" type="attribute" required="true">
-                    <caption>Content attribute</caption>
-                    <description>String attribute holding the HTML.</description>
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-            </propertyGroup>
-            <propertyGroup caption="Appearance">
-                <property key="maxLines" type="integer" defaultValue="0">
-                    <caption>Max lines</caption>
-                    <description>Clamp the rendered text to this many lines (0 = no clamp).</description>
-                </property>
-                <property key="highlightCode" type="boolean" defaultValue="false">
-                    <caption>Highlight code blocks</caption>
-                    <description>Apply syntax highlighting to pre/code blocks (requires highlight.js on the page).</description>
-                </property>
-            </propertyGroup>
+        <propertyGroup caption="Data source">
+            <property key="messageString" type="attribute" required="true">
+                <caption>Content attribute</caption>
+                <description>Add the attribute containing the contents to display.</description>
+                <attributeTypes>
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
         </propertyGroup>
         <propertyGroup caption="Microflow links">
             <property key="microflowLinks" type="object" isList="true" required="false">
                 <caption>Microflow links</caption>
-                <description>Maps each link name stored in the HTML to an action.</description>
+                <description>Microflows which can be linked to in the text.</description>
                 <properties>
                     <propertyGroup caption="Link">
-                        <property key="linkName" type="string" required="true">
-                            <caption>Link name</caption>
-                            <description>Must match the name used in the editor / stored in data-mf.</description>
+                        <property key="functionNames" type="string" required="true">
+                            <caption>Link Name</caption>
+                            <description>Descriptive name of a microflow, which can be inserted as link in the document. The mapping of the name to a real microflow is the responsibility of the Rich Text Viewer.</description>
                         </property>
-                        <property key="linkAction" type="action" required="true">
-                            <caption>Action</caption>
-                            <description>Executed when a link with this name is clicked.</description>
+                        <property key="mfName" type="action" required="true">
+                            <caption>Microflow Name</caption>
+                            <description>Attach the microflow.</description>
                         </property>
                     </propertyGroup>
                 </properties>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Appearance">
+            <property key="cutOffRules" type="integer" required="true" defaultValue="0">
+                <caption>Cut of rules</caption>
+                <description>Cut of text after a certain height. Set this to a number of pixels.</description>
+            </property>
+        </propertyGroup>
         <propertyGroup caption="Common">
-            <systemProperty key="Visibility" />
             <systemProperty key="Name" />
+            <systemProperty key="Visibility" />
         </propertyGroup>
     </properties>
 </widget>

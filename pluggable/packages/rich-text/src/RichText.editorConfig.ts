@@ -22,25 +22,52 @@ interface Problem {
 }
 
 export function getProperties(values: RichTextPreviewProps, defaultProperties: Properties): Properties {
-    if (values.preset !== "custom") {
-        hideProperty(defaultProperties, "customToolbar");
+    if (values.useCustomToolbar) {
+        // The 14 Document toolbar toggles are ignored when a custom toolbar is used.
+        [
+            "toolbarDocument",
+            "toolbarClipboard",
+            "toolbarEditing",
+            "toolbarForms",
+            "toolbarSeperator1",
+            "toolbarBasicstyles",
+            "toolbarParagraph",
+            "toolbarLinks",
+            "toolbarInsert",
+            "toolbarSeperator2",
+            "toolbarStyles",
+            "toolbarColors",
+            "toolbarTools",
+            "toolbarOthers"
+        ].forEach(key => hideProperty(defaultProperties, key));
+    } else {
+        hideProperty(defaultProperties, "customToolbars");
+    }
+    if (!values.countPlugin) {
+        hideProperty(defaultProperties, "countPluginMaxCount");
+    }
+    if (values.imagePasteMode !== "upload") {
+        hideProperty(defaultProperties, "imageUploadMicroflow");
+    }
+    if (!values.showLabel) {
+        hideProperty(defaultProperties, "fieldCaption");
     }
     return defaultProperties;
 }
 
 export function check(values: RichTextPreviewProps): Problem[] {
     const problems: Problem[] = [];
-    if (values.preset === "custom" && !values.customToolbar.trim()) {
+    if (values.useCustomToolbar && values.customToolbars.length === 0) {
         problems.push({
-            property: "customToolbar",
-            message: "Custom toolbar is selected but no items are listed."
+            property: "customToolbars",
+            message: "Use custom toolbar is enabled but no toolbar items are defined."
         });
     }
     values.microflowLinks.forEach((link, i) => {
-        if (!link.linkName?.trim()) {
+        if (!link.functionNames?.trim()) {
             problems.push({
-                property: `microflowLinks/${i + 1}/linkName`,
-                message: "Link name is required."
+                property: `microflowLinks/${i + 1}/functionNames`,
+                message: "Link Name is required."
             });
         }
     });

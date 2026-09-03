@@ -4,23 +4,29 @@
  * its own plugins/skins/lang relative to `CKEDITOR.basePath`, so it must be
  * loaded as an external script rather than bundled.
  *
- * Default URL is the last open-source (LGPL/MPL) build, 4.22.0, from the CKEditor
- * CDN. For offline apps or to avoid the external request, host the
- * `node_modules/ckeditor4/` folder inside your Mendix app (e.g. `theme/web/ckeditor/`)
- * and point the widget's "Editor script URL" property at it.
+ * Default URL is the "full-all" preset of the last open-source (LGPL/MPL) build,
+ * 4.22.0, from the CKEditor CDN — matching the legacy widget's vendored build
+ * (`preset: 'full'` + extras). For offline apps or to avoid the external request,
+ * host a full CKEditor 4.22.0 build inside your Mendix app
+ * (e.g. `theme/web/ckeditor/`) and point the widget's "Editor script URL" at it.
  */
 
-export const DEFAULT_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js";
+export const DEFAULT_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js";
 
 interface CKEditorGlobal {
-    replace(el: HTMLElement | string, config?: Record<string, unknown>): CKEditorInstance;
-    inline(el: HTMLElement | string, config?: Record<string, unknown>): CKEditorInstance;
+    replace(el: HTMLElement | string, config?: Record<string, unknown>): CKEditorInstance | null;
+    inline(el: HTMLElement | string, config?: Record<string, unknown>): CKEditorInstance | null;
     instances: Record<string, CKEditorInstance | undefined>;
     on(event: string, listener: () => void): void;
     status: string;
-    plugins: { registered: Record<string, unknown>; add(name: string, def: Record<string, unknown>): void };
+    plugins: {
+        registered: Record<string, unknown>;
+        add(name: string, def: Record<string, unknown>): void;
+        addExternal(name: string, path: string, fileName?: string): void;
+    };
     dialog: { add(name: string, fn: unknown): void };
     dialogCommand: new (name: string) => unknown;
+    config: Record<string, unknown>;
     TRISTATE_OFF: number;
 }
 
@@ -78,6 +84,11 @@ export function loadCKEditor(url: string = DEFAULT_CKEDITOR_URL): Promise<CKEdit
         };
         script.onerror = () => reject(new Error(`Failed to load CKEditor 4 from ${url}`));
         document.head.appendChild(script);
+    }).catch(err => {
+        // Don't cache the rejection — allow a retry on the next mount.
+        pending = null;
+        loadedFrom = null;
+        throw err;
     });
 
     return pending;

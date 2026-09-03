@@ -6,7 +6,7 @@ export function preview(props: RichTextViewerPreviewProps): ReactElement {
         <div
             style={{ font: "14px/1.4 sans-serif", color: "#3b4251" }}
             dangerouslySetInnerHTML={{
-                __html: props.content || "<em>Bound content renders here at runtime.</em>"
+                __html: props.messageString || "<em>Bound content renders here at runtime.</em>"
             }}
         />
     );

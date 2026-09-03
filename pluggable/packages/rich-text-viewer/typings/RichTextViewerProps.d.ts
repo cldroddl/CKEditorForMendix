@@ -7,13 +7,13 @@ import { ActionValue, EditableValue } from "mendix";
 import { CSSProperties } from "react";
 
 export interface MicroflowLinksType {
-    linkName: string;
-    linkAction?: ActionValue;
+    functionNames: string;
+    mfName?: ActionValue;
 }
 
 export interface MicroflowLinksPreviewType {
-    linkName: string;
-    linkAction: {} | null;
+    functionNames: string;
+    mfName: {} | null;
 }
 
 export interface RichTextViewerContainerProps {
@@ -21,10 +21,9 @@ export interface RichTextViewerContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    content: EditableValue<string>;
-    maxLines: number;
-    highlightCode: boolean;
+    messageString: EditableValue<string>;
     microflowLinks: MicroflowLinksType[];
+    cutOffRules: number;
 }
 
 export interface RichTextViewerPreviewProps {
@@ -38,8 +37,7 @@ export interface RichTextViewerPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
-    content: string;
-    maxLines: number | null;
-    highlightCode: boolean;
+    messageString: string;
     microflowLinks: MicroflowLinksPreviewType[];
+    cutOffRules: number | null;
 }

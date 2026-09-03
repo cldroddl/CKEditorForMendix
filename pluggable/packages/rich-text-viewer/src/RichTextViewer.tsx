@@ -6,30 +6,29 @@ import { RichTextViewerContainerProps } from "../typings/RichTextViewerProps";
 import "./ui/RichTextViewer.css";
 
 export function RichTextViewer(props: RichTextViewerContainerProps): ReactElement | null {
-    const { content, microflowLinks, maxLines, highlightCode, class: className } = props;
+    const { messageString, microflowLinks, cutOffRules, class: className } = props;
 
-    const html = useMemo(() => migrateStoredValue(content.value ?? ""), [content.value]);
+    const html = useMemo(() => migrateStoredValue(messageString.value ?? ""), [messageString.value]);
 
     const links = useMemo<MicroflowLinkBinding[]>(
         () =>
             microflowLinks.map(item => ({
-                name: item.linkName,
-                execute: item.linkAction?.canExecute ? () => item.linkAction?.execute() : undefined
+                name: item.functionNames,
+                execute: item.mfName?.canExecute ? () => item.mfName?.execute() : undefined
             })),
         [microflowLinks]
     );
 
-    if (content.status !== ValueStatus.Available) {
+    if (messageString.status !== ValueStatus.Available) {
         return null;
     }
 
+    // Legacy "Cut of rules" = clip the rendered content to this pixel height.
+    const clipStyle = cutOffRules > 0 ? { maxHeight: cutOffRules, overflow: "hidden" as const } : undefined;
+
     return (
-        <RichTextView
-            className={className}
-            html={html}
-            links={links}
-            maxLines={maxLines}
-            highlightCode={highlightCode}
-        />
+        <div className={className} style={clipStyle}>
+            <RichTextView html={html} links={links} highlightCode />
+        </div>
     );
 }

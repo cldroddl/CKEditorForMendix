@@ -2,11 +2,9 @@
     border-radius: 4px;
 }
 
-.rt-count {
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--color-text-secondary, #6c7180);
-    text-align: right;
+.rt-editor__label {
+    display: block;
+    margin-bottom: 4px;
 }
 
 /* Microflow-link styling parity with the legacy widget */

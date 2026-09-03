@@ -8,7 +8,7 @@ under `../src/` is left in place for reference until parity is reached.
 
 |              | `react-ver` (CKEditor 5)                  | `ckeditor4-react` (this branch)                                                        |
 | ------------ | ----------------------------------------- | -------------------------------------------------------------------------------------- |
-| Editor       | CKEditor 5 v48, bundled (~4.8 MB `.mpk`)  | CKEditor 4.22.0, loaded at runtime (~52 KB `.mpk`)                                     |
+| Editor       | CKEditor 5 v48, bundled (~4.8 MB `.mpk`)  | CKEditor 4.22.0, loaded at runtime (~64 KB `.mpk`)                                     |
 | Licence      | GPL-2.0-or-later + mandatory `licenseKey` | **GPL-2.0 / LGPL-2.1 / MPL-1.1 tri-licence** — usable in a proprietary app with no key |
 | Support      | active                                    | **EOL since June 2023** — no security patches for the open-source line                 |
 | Architecture | modern                                    | legacy (iframe editing, global `window.CKEDITOR`)                                      |
@@ -19,12 +19,12 @@ paid/commercial.
 
 ## Target stack
 
-| Tool                              | Version                                                                |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| React                             | ≥ 19 (peer, provided by the Mendix client — Mendix 11)                 |
-| `@mendix/pluggable-widgets-tools` | 11.12 (same as `react-ver`)                                            |
-| TypeScript                        | as bundled with pluggable-widgets-tools 11                             |
-| Editor                            | **CKEditor 4.22.0** ("standard-all"), loaded at runtime via `<script>` |
+| Tool                              | Version                                                            |
+| --------------------------------- | ------------------------------------------------------------------ |
+| React                             | ≥ 19 (peer, provided by the Mendix client — Mendix 11)             |
+| `@mendix/pluggable-widgets-tools` | 11.12 (same as `react-ver`)                                        |
+| TypeScript                        | as bundled with pluggable-widgets-tools 11                         |
+| Editor                            | **CKEditor 4.22.0** ("full-all"), loaded at runtime via `<script>` |
 
 ### Editor loading (this branch)
 
@@ -32,14 +32,21 @@ paid/commercial.
     only declare React `^18`. Instead `src/components/Editor.tsx` is a hand-rolled `useEffect` wrapper —
     `loadCKEditor()` injects the script once, `CKEDITOR.replace()` on mount, guarded `destroy(true)` on unmount (handles
     React 19 StrictMode double-mount).
--   Default script URL: `https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js` (still live). `config.versionCheck`
-    is set to `false` to silence the CDN "update available" nag.
--   The **"Editor script URL"** widget property overrides it. For offline / no-external-request deployments, copy
-    `node_modules/ckeditor4/` into the Mendix app (e.g. `theme/web/ckeditor/`) and point the property at
-    `.../ckeditor/ckeditor.js`. `ckeditor4@4.22.0` is a devDependency purely to provide those files.
--   The `mendixlink` plugin (`src/ckeditor4/mendixLinkPlugin.ts`) is registered on `window.CKEDITOR` before editor
-    creation — it's a near-direct port of the legacy Dojo widget's `plugin.js` + `dialogs/mendixlink.js`, but writes the
-    new `data-mf` wire format.
+-   Default script URL: `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` (still live) — the **"full-all"** preset,
+    matching the legacy widget's vendored build (`preset: 'full'` + extras). `config.versionCheck` is `false` to silence
+    the CDN "update available" nag. `config.allowedContent = true` — ACF off, so stored HTML is not stripped (parity with
+    the legacy full build).
+-   The **"Editor script URL"** widget property overrides it. For offline / no-external-request deployments, download a
+    CKEditor 4.22.0 "full-all" build and host it inside the Mendix app (e.g. `theme/web/ckeditor/ckeditor.js`).
+-   Bundled plugins (inlined as TS, registered on `window.CKEDITOR` before `CKEDITOR.replace`):
+    -   `mendixlink` (`src/ckeditor4/mendixLinkPlugin.ts`) — port of the legacy `plugin.js` + `dialogs/mendixlink.js`,
+        but writes the `data-mf` wire format.
+    -   `pastebase64` (`src/ckeditor4/pasteBase64Plugin.ts`) — verbatim port of the legacy MIT plugin; enabled when
+        Image Mode = Base64.
+-   From `full-all`: `divarea`, `tableresize`, `maximize`, `widget`, `codesnippet` (when code highlighting on),
+    `wordcount` (when Count plugin on).
+-   **Not ported yet:** `oembed` / media embed (needs jQuery + a hosted `libs/`), image **upload** (`uploadimage` /
+    `simple-image-browser`). `imagePasteMode="upload"` + `imageUploadMicroflow` are accepted in the XML but inert.
 
 ## Widgets
 
@@ -47,16 +54,16 @@ Two pluggable widgets ship from one package (`CKEditorForMendix` client module):
 
 1. **RichText (editor)** — `id: ckeditorformendix.RichText`
 
-    - `content: EditableValue<string>` — the HTML attribute, two-way bound
-    - `editability` handled via `content.readOnly` + `content.setValue()`
-    - Toolbar config, enter mode, image handling, code highlighting, word count, oembed, and the **microflow-link**
-      plugin
-    - `onChange` / `onKeyPress` actions (`ActionValue`)
+    - `messageString: EditableValue<string>` — the HTML attribute, two-way bound (`.readOnly` = editability)
+    - Legacy interface: 14 `toolbar*` toggles + `customToolbars`, `enterMode`/`shiftEnterMode`, `enableSpellCheck`,
+      `autoParagraph`, appearance (`width`/`height`/`showLabel`/`fieldCaption`/`maximizeOffset`/…),
+      `enableCodeHighlighting`, `countPlugin`, `imagePasteMode`, and the **microflow-link** plugin
+    - `onChangeMicroflow` / `onKeyPressMicroflow` actions
 
 2. **RichTextViewer** — `id: ckeditorformendix.RichTextViewer`
-    - `content: EditableValue<string>` (read-only render)
-    - Renders stored HTML, rehydrates `a.mx-microflow-link` placeholders, wires click → microflow, rewrites image URLs,
-      code highlighting, optional line clamp
+    - `messageString: EditableValue<string>` (read-only render)
+    - Renders stored HTML, rehydrates `a.mx-microflow-link` placeholders, wires click → `mfName` action, always
+      highlights `pre code`, clips to `cutOffRules` pixels
 
 ## The microflow-link mechanism (must stay wire-compatible with existing stored data)
 
@@ -97,42 +104,62 @@ and on click runs the microflow mapped from `functionName` via the widget's `mic
 -   Viewer: pure DOM pass over `dangerouslySetInnerHTML` output — find `a.mx-microflow-link`, read `data-mf` (or parse
     legacy `onclick`), attach a React-managed click handler that calls the matching `ActionValue.execute()`.
 
-## Property mapping (old XML → new pluggable XML)
+## Widget XML — mirrors the legacy interface
 
-| Old key                                                                                                             | New                                                                 | Notes                                                      |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `messageString` (attribute String)                                                                                  | `content` (`attribute`, `EditableValue<string>`)                    |                                                            |
-| `onKeyPressMicroflow` / `onChangeMicroflow` (microflow)                                                             | `onKeyPress` / `onChange` (`action`)                                |                                                            |
-| `enterMode` / `shiftEnterMode` (enum P/BR/DIV)                                                                      | keep as enum; map to CKEditor 5 config                              | CKEditor 5 has no direct `shiftEnterMode`; document limits |
-| `autoParagraph`, `enableSpellCheck`                                                                                 | keep as boolean                                                     |                                                            |
-| `toolbar*` booleans + `useCustomToolbar` + `customToolbars` list                                                    | `preset` enum (basic/standard/full) + optional `customToolbar` list | simplify; CKEditor 5 toolbar item names differ             |
-| `bodyCssClass`, `width`, `height`, `showLabel`, `fieldCaption`                                                      | keep                                                                | label via `fieldCaption` (`textTemplate`)                  |
-| `maximizeOffset`, `showStatusBar`, `showToolbarCollapsed`                                                           | drop or map                                                         | CKEditor 5 UX differs                                      |
-| `enableCodeHighlighting`                                                                                            | `codeBlock` boolean                                                 | CKEditor 5 `CodeBlock` plugin                              |
-| `microflowLinks` list (`functionNames`, `mfName`)                                                                   | `microflowLinks` list (`linkName` string, `linkAction` action)      |                                                            |
-| `imagePasteMode` (base64/upload), `imageentity`, `imageUploadMicroflow`, `imageconstraint`, `useImageStyleProperty` | `imageUpload` enum + `imageDatasource`/`imageUploadAction`          | defer to phase 2                                           |
-| `countPlugin`, `countPluginMaxCount`                                                                                | `showCount` boolean + `maxCount` int                                | CKEditor 5 `WordCount`                                     |
-| viewer `cutOffRules`                                                                                                | `maxLines` int                                                      | CSS line-clamp instead of dotdotdot                        |
+The widget `.xml` reproduces the legacy `src/CKEditorForMendix/CKEditorForMendix.xml` /
+`CKEditorViewerForMendix.xml` interface: same property `key`s, captions, defaults, enum values, order, and grouping.
+Legacy `<category>` values become top-level `<propertyGroup caption="...">` (Studio renders them identically). Editor
+groups, in legacy order: **Data source · Behavior · Document · Custom Toolbar · Appearance · Code · Microflow links ·
+Images · Count** (+ `Advanced` for `editorScriptUrl`, + `Common` for system properties).
 
-> The property-mapping notes above that mention CKEditor 5 (`shiftEnterMode`, `codeBlock`, `WordCount`, toolbar item
-> names, maximize) are from `react-ver`. On this branch: toolbar presets use CKEditor 4 button names
-> (`src/ckeditor4/toolbarPresets.ts`); `enterMode` maps to `CKEDITOR.ENTER_P/ENTER_BR`; `enableCodeHighlighting` and
-> `countPlugin` are **not yet ported** (`codeBlock` / `showCount` properties dropped for now).
+### Deviations forced by the pluggable schema
+
+| legacy                                                                                    | this branch                            | why                                                                                                             |
+| ----------------------------------------------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `<category>` per property                                                                 | `<propertyGroup>` nesting              | pluggable widgets ignore `<category>`                                                                           |
+| `onKeyPressMicroflow` / `onChangeMicroflow` / `imageUploadMicroflow` — `type="microflow"` | `type="action"` (same keys)            | `microflow` is a legacy-only type                                                                               |
+| viewer `mfName` — `type="microflow"`                                                      | `type="action"` (same key)             | ″                                                                                                               |
+| `imageentity` — `type="entity"` (`isPath`/`referenceSet`)                                 | **dropped**                            | `entity` needs a companion `datasource` property (extra UI); target entity is decided in `imageUploadMicroflow` |
+| `imageconstraint` — `type="entityConstraint"`                                             | **dropped**                            | no pluggable equivalent; was already non-functional in the legacy widget                                        |
+| `fieldCaption` — `type="translatableString"`                                              | `type="textTemplate"` (same key)       | `translatableString` is legacy-only                                                                             |
+| —                                                                                         | **added** `editorScriptUrl` (Advanced) | legacy vendored CKEditor; this build loads it at runtime                                                        |
+| viewer `highlightCode` (from the first-cut rewrite)                                       | **removed**                            | legacy viewer always highlights `pre code`                                                                      |
+
+Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolbar` + `customToolbars`
+(`ctItemType` 69-value enum + `ctItemToolbar`), `enterMode`/`shiftEnterMode` P/BR/DIV, `autoParagraph`,
+`enableSpellCheck`, `bodyCssClass`, `width`, `height`, `showLabel`, `maximizeOffset`, `showStatusBar`,
+`showToolbarCollapsed`, `enableCodeHighlighting`, `microflowLinks`/`functionNames`, `imagePasteMode`,
+`useImageStyleProperty`, `countPlugin`, `countPluginMaxCount`, viewer `cutOffRules` — is verbatim.
+
+### Runtime mapping (CKEditor 4)
+
+-   14 `toolbar*` booleans → `config.toolbarGroups` (ported from legacy `_addToolbars`, `src/ckeditor4/buildToolbar.ts`).
+-   `useCustomToolbar` + `customToolbars` → `config.toolbar` grouped by `ctItemToolbar` (ported from `_buildCustomToolbars`).
+-   `enterMode`/`shiftEnterMode` → `CKEDITOR.ENTER_P` (1) / `ENTER_BR` (2) / `ENTER_DIV` (3).
+-   `enableSpellCheck` → `config.disableNativeSpellChecker`; `autoParagraph` → `config.autoParagraph`.
+-   `width`/`height` → `config.width`/`config.height`; `maximizeOffset` → `config.maximizeOffset`.
+-   `showStatusBar=false` → `removePlugins: elementspath`, `resize_enabled: false`.
+-   `showToolbarCollapsed` → `toolbarStartupExpanded`.
+-   `enableCodeHighlighting` → `codesnippet` extra plugin; `countPlugin` → `wordcount` extra plugin + `config.wordcount`
+    (`maxCharCount` from `countPluginMaxCount`).
+-   `imagePasteMode="base64"` → `pastebase64` extra plugin. `showLabel`+`fieldCaption` → a `<label>` above the editor.
+-   Viewer `cutOffRules` (px) → wrapper `max-height` + `overflow: hidden`.
 
 ## Phases (this branch)
 
-1. ✅ **Scaffold + build green** — both widget `.mpk`s build (editor 52 KB — CKEditor loaded at runtime), shared unit
-   tests + lint pass. Editor renders CKEditor 4.22.0 bound to `content`, read-only support, `onChange`/`onKeyPress`.
-2. 🟡 **Microflow links** — the CKEditor 4 `mendixlink` plugin (button + context menu + dialog for name/label/css/title)
-   and the viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Still
-   to do: real Studio Pro round-trip test, and dialog polish.
-3. **Toolbar / enter mode** — presets wired (basic/standard/full/custom); needs Studio Pro verification.
-4. **Code snippet + character count** — `codesnippet` / word-count plugins not in the "standard-all" build; add a
-   "full-all" build option or bundle the extra plugins.
-5. **Image handling** (base64 paste, then upload) — not started.
-6. **Self-hosted asset pipeline** — currently the CKEditor script is loaded from a URL (CDN default, or the
-   `editorScriptUrl` property). A `rollup.config.mjs` copy step to bundle `node_modules/ckeditor4/` into the `.mpk`
-   would remove the external request entirely — not done yet.
+1. ✅ **Scaffold + build green** — both `.mpk`s build, lint + shared tests pass.
+2. ✅ **Legacy XML interface + CKEditor 4 config mapping** — editor XML reproduces all 40 legacy properties + groups;
+   `toolbar*` / `customToolbars` / enter mode / spell check / count / code highlighting / label wired to CKEditor 4
+   config. Default build → `full-all`. `mendixlink` + `pastebase64` inlined.
+3. 🟡 **Microflow links** — `mendixlink` plugin (button + context menu + dialog for name/label/css/title) and the
+   viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Still to do:
+   real Studio Pro round-trip test; C6 (insert-over-selection deletes text — see `review-2026-09-03.md`).
+4. **Image upload** (`imagePasteMode="upload"` + `imageUploadMicroflow`) — accepted in XML, not implemented.
+5. **oembed / media embed** — not ported (needs jQuery + hosted `libs/`).
+6. **Self-hosted asset pipeline** — the CKEditor script loads from a URL (CDN default, or `editorScriptUrl`). A rollup
+   copy step bundling a full build into the `.mpk` would remove the external request — not done.
+7. **Review follow-ups** — `review-2026-09-03.md` C2/C4/C5/C8 partly addressed (C4 rejected-promise reset, C8 null
+   guard, C2 emit only on real change); C1 handled via `allowedContent: true` (parity, not sanitization).
 
 ### Build/tooling notes
 
@@ -170,15 +197,22 @@ and on click runs the microflow mapped from `functionName` via the widget's `mic
 >     사용 가능. 그래서 `rich-text` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
 > -   대가: CKEditor 4 오픈소스는 **2023년 6월 EOL** — 보안 패치 없음. 라이선스가 결정적이지 않다면 `react-ver`
 >     (CKEditor 5) 권장.
-> -   `.mpk` 52KB (CKEditor를 번들하지 않고 런타임에 `<script>`로 로드). 기본 URL은
->     `https://cdn.ckeditor.com/4.22.0/standard-all/ckeditor.js`, 위젯의 "Editor script URL" 속성으로 자체 호스팅 URL 지
->     정 가능 (오프라인/외부요청 차단 환경).
+> -   `.mpk` 약 60KB (CKEditor를 번들하지 않고 런타임에 `<script>`로 로드). 기본 URL은
+>     `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` (레거시 vendoring 빌드 `preset: 'full'`와 동일한
+>     "full-all" 프리셋), 위젯의 "Editor script URL" 속성으로 자체 호스팅 URL 지정 가능 (오프라인/외부요청 차단 환경).
 > -   `ckeditor4-react` npm 패키지는 **사용 안 함** (현재 메이저가 상용 LTS 라이선스에 묶여 있고 React `^18`만 선언). 대
 >     신 수동 `useEffect` 래퍼로 스크립트 주입 + `CKEDITOR.replace` + StrictMode 안전한 정리.
-> -   `mendixlink` 플러그인은 구 Dojo 위젯의 `plugin.js`/`dialogs`를 거의 그대로 포팅 (단 신규 `data-mf` wire 형식).
+> -   `mendixlink` / `pastebase64` 플러그인은 구 Dojo 위젯 소스를 TS로 인라인 포팅 (`mendixlink`는 신규 `data-mf` wire
+>     형식).
 >
-> 아래 본문은 `react-ver`(CKEditor 5) 기준 번역이므로, CKEditor 5 관련 서술(`shiftEnterMode`, `codeBlock`, `WordCount`,
-> 밸룬 UI, 4.8MB 번들 등)은 이 브랜치에 해당하지 않습니다.
+> **위젯 XML은 레거시 인터페이스를 그대로 재현합니다** — `src/CKEditorForMendix/CKEditorForMendix.xml` /
+> `CKEditorViewerForMendix.xml`의 property key·caption·기본값·enum·순서·그룹 동일. `<category>`는 pluggable에서
+> 무시되므로 최상위 `<propertyGroup>`으로 변환 (Studio에서 동일하게 표시). 스키마상 불가피한 차이:
+> `type="microflow"` → `type="action"` (같은 key), `imageentity`(entity)·`imageconstraint`(entityConstraint) 삭제,
+> `fieldCaption` translatableString → textTemplate, `editorScriptUrl` 추가. 자세한 표는 위 영어 "Widget XML" 절 참고.
+>
+> 아래 본문은 초기 `react-ver`(CKEditor 5) 기준 번역이라 일부 서술(밸룬 UI, `preset` enum, 4.8MB 번들 등)은 이 브랜치에
+> 해당하지 않습니다.
 
 # CKEditor for Mendix — Dojo → Pluggable Widget 재작성
 
