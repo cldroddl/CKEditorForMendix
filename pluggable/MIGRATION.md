@@ -155,9 +155,23 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
    viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Still to do:
    real Studio Pro round-trip test; C6 (insert-over-selection deletes text — see `review-2026-09-03.md`).
 4. **Image upload** (`imagePasteMode="upload"` + `imageUploadMicroflow`) — accepted in XML, not implemented.
-5. **oembed / media embed** — not ported (needs jQuery + hosted `libs/`).
+5. ⚖️ **oembed / media embed — DECISION NEEDED.** The legacy widget bundles the third-party `oembed` plugin (media/URL
+   embed via an "insert" toolbar button; no dedicated widget property). To bring it back:
+
+    - Bundle jQuery + the legacy `oembed/` folder (`plugin.js` + `libs/jquery.oembed.js` + `css` + `lang/`) as widget
+      assets (needs the asset pipeline from item 6).
+    - `CKEDITOR.plugins.addExternal("oembed", <assetUrl>, "plugin.js")` and set `CKEDITOR.jQuery = <jQuery>` before
+      `CKEDITOR.replace` (the plugin can't reach jQuery from the `full-all` CDN basePath).
+    - Add `oembed` to `extraPlugins`, keep `config.oembed_WrapperClass = "embededContent"`.
+
+    **Trade-off:** this pulls jQuery (~30 KB min) into a modern React widget purely for one editor plugin. Alternatives:
+    drop oembed permanently (media embed = paste an `<iframe>` in Source mode), or find a jQuery-free CKEditor 4 media
+    plugin. `videodetector` from the legacy `lib/plugins/` is **not** a candidate — it had no `plugin.js` and was never
+    referenced by the legacy widget.
+
 6. **Self-hosted asset pipeline** — the CKEditor script loads from a URL (CDN default, or `editorScriptUrl`). A rollup
-   copy step bundling a full build into the `.mpk` would remove the external request — not done.
+   copy step bundling a full build (and any addExternal plugins, see item 5) into the `.mpk` would remove the external
+   request — not done.
 7. **Review follow-ups** — `review-2026-09-03.md` C2/C4/C5/C8 partly addressed (C4 rejected-promise reset, C8 null
    guard, C2 emit only on real change); C1 handled via `allowedContent: true` (parity, not sanitization).
 
