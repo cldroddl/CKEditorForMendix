@@ -169,8 +169,11 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
    `toolbar*` / `customToolbars` / enter mode / spell check / count / code highlighting / label wired to CKEditor 4
    config. Default build → `full-all`. `mendixlink` + `pastebase64` inlined.
 3. 🟡 **Microflow links** — `mendixlink` plugin (button + context menu + dialog for name/label/css/title) and the
-   viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Still to do:
-   real Studio Pro round-trip test; C6 (insert-over-selection deletes text — see `review-2026-09-03.md`).
+   viewer's click→action wiring are in; legacy `onclick` upcast + `migrateStoredValue` covered by tests. Manually
+   verified in an `mxcli`-scaffolded test project (`tests/testProject/mdlsource/setup.mdl`): editor + viewer render
+   and round-trip; the `microflowLinks` list entries themselves must be set in Studio Pro (`mxcli` v0.16.0 can't write
+   widget object-list properties — see README "scaffolding with `mxcli`"). Still to do: end-to-end link-click test with
+   a real microflow; C6 (insert-over-selection deletes text — see `review-2026-09-03.md`).
 4. **Image upload** (`imagePasteMode="upload"` + `imageUploadMicroflow`) — accepted in XML, not implemented.
 5. ⚖️ **oembed / media embed — DECISION NEEDED.** The legacy widget bundles the third-party `oembed` plugin (media/URL
    embed via an "insert" toolbar button; no dedicated widget property). To bring it back:
@@ -336,7 +339,9 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
    `content`에 바인딩된 CKEditor 5를 렌더하며 읽기 전용 지원 및 `onChange`/`onKeyPress` 액션 포함.
 2. 🟡 **microflow 링크** — `MendixLink` CKEditor 플러그인(editing 컨버터 + 툴바 드롭다운 + command)과 뷰어의 클릭→액션배
    선 완료; 레거시 `onclick` upcast + `migrateStoredValue`는 테스트로 커버됨. 남은 것: label/CSS/title 편집용 밸룬 UI (
-   현재는 이름만), 실제 저장 데이터 대상 왕복(round-trip) 테스트.
+   현재는 이름만), 실제 저장 데이터 대상 왕복(round-trip) 테스트. `mxcli`로 스캐폴딩한 테스트 프로젝트
+   (`tests/testProject/mdlsource/setup.mdl`)에서 수동 확인 — `microflowLinks` 목록 항목은 Studio Pro에서 직접 입력해야
+   함 (`mxcli` v0.16.0은 위젯 오브젝트 리스트 속성을 못 씀; README "`mxcli`로 스캐폴딩" 참고).
 3. **툴바 프리셋 + enter 모드 + 글자 수 세기 + 코드 블록** — 프리셋은 배선됨; 글자 수 UI 요소와 enter 모드 동등성 마무리
    필요.
 4. **이미지 처리** (base64 먼저, 이후 datasource/action 기반 업로드) — 미착수.

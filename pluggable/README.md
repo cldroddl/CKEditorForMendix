@@ -71,6 +71,29 @@ confirm each editor's "Insert a Mendix microflow link" dialog shows its own list
 
 **5. Run** — F5 in Studio Pro (App Settings → Runtime → _React client_ enabled, the 11.x default).
 
+#### Alternative: scaffolding with `mxcli`
+
+`tests/testProject/mdlsource/setup.mdl` is an [`mxcli`](https://www.npmjs.com/package/@mendix/mxcli) script that
+recreates the entity, `DS_Test` microflow, `NAV_LinkClicked` nanoflow, `TestPage_Web` page (two Data views: `editorA` +
+`viewer1`, and `editorB`) and navigation. Run it against a fresh _Blank Web App_ with:
+
+```
+mxcli -p tests/testProject/testProject.mpr exec tests/testProject/mdlsource/setup.mdl
+```
+
+Caveats with `mxcli` v0.16.0 (all handled in Studio Pro afterwards; the header comment in `setup.mdl` has the full
+checklist):
+
+-   **Widget object-list properties can't be written from MDL.** `microflowlink` / `customtoolbar` blocks inside a
+    `pluggablewidget` are rejected by the parser (`check` and `exec` both) — they only come out of `DESCRIBE`, one-way. So
+    the _Microflow links_ list entries in step 3 must be added by hand in Studio Pro.
+-   **`CE0463` "The definition of this widget has changed"** on every widget after `exec` — `mxcli` places pluggable
+    widgets without Studio Pro's template BSON. Clear it once with **App → Update all widgets**.
+-   `mxcli` may auto-seed one empty _Microflow links_ row, which trips the editor's "Link Name is required" check at
+    runtime — delete it or give it a name.
+-   `mxcli` MDL has no _Show message_ activity, so `NAV_LinkClicked` uses _Log message_; swap in _Show message_ /
+    _Show page_ in Studio Pro if you want the click to be louder.
+
 Do **not** reuse the legacy `../test/Test.mpr` — it is a Mendix 7 project, incompatible with these widgets.
 
 ## Status
@@ -155,6 +178,28 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
     **Update widgets**
 
 **5. 실행** — Studio Pro에서 F5 (App Settings → Runtime → _React client_ 활성, 11.x 기본값)
+
+#### 대안: `mxcli`로 스캐폴딩
+
+`tests/testProject/mdlsource/setup.mdl`은 엔티티, `DS_Test` 마이크로플로우, `NAV_LinkClicked` 나노플로우,
+`TestPage_Web` 페이지(Data view 2개: `editorA` + `viewer1`, 그리고 `editorB`), 내비게이션을 재생성하는
+[`mxcli`](https://www.npmjs.com/package/@mendix/mxcli) 스크립트입니다. 새 *Blank Web App*에 대해 실행:
+
+```
+mxcli -p tests/testProject/testProject.mpr exec tests/testProject/mdlsource/setup.mdl
+```
+
+`mxcli` v0.16.0 제약 (실행 후 Studio Pro에서 처리; 전체 체크리스트는 `setup.mdl` 헤더 주석에 있음):
+
+-   **위젯 오브젝트 리스트 속성은 MDL로 못 씀.** `pluggablewidget` 안의 `microflowlink` / `customtoolbar` 블록은
+    파서가 거부함(`check`·`exec` 둘 다) — `DESCRIBE`로만 한쪽 방향 출력됨. 따라서 3단계의 _Microflow links_ 목록
+    항목은 Studio Pro에서 직접 추가해야 함.
+-   `exec` 후 모든 위젯에 **`CE0463` "The definition of this widget has changed"** — `mxcli`가 Studio Pro 템플릿 BSON
+    없이 배치하기 때문. **App → Update all widgets** 한 번으로 해소.
+-   `mxcli`가 빈 _Microflow links_ 행 하나를 자동 시드할 수 있는데, 이게 런타임에서 에디터의 "Link Name is required"
+    검사를 유발함 — 삭제하거나 이름을 넣을 것.
+-   `mxcli` MDL에는 _Show message_ 액티비티가 없어 `NAV_LinkClicked`는 *Log message*를 씀; 클릭을 더 눈에 띄게
+    하려면 Studio Pro에서 _Show message_ / *Show page*로 교체.
 
 레거시 `../test/Test.mpr`는 **재사용 금지** — Mendix 7 프로젝트라 이 위젯과 호환되지 않습니다.
 
