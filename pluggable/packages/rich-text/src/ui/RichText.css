@@ -11,3 +11,16 @@
 .rt-editor a.mx-microflow-link {
     cursor: pointer;
 }
+
+/* Shown when the CKEditor script fails to load — raw-HTML fallback */
+.rt-editor__error {
+    margin-bottom: 8px;
+}
+
+.rt-editor__fallback-input {
+    width: 100%;
+    min-height: 8em;
+    font-family: monospace;
+    white-space: pre;
+    overflow: auto;
+}

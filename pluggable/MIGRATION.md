@@ -40,6 +40,9 @@ paid/commercial.
     the legacy full build).
 -   The **"Editor script URL"** widget property overrides it. For offline / no-external-request deployments, download a
     CKEditor 4.22.0 "full-all" build and host it inside the Mendix app (e.g. `theme/web/ckeditor/ckeditor.js`).
+-   If the script never loads (offline, firewall, CSP), the widget renders a warning plus a plain `<textarea>` bound to
+    the same attribute — the stored HTML stays visible and editable as raw source, and formatting returns once the
+    script loads (e.g. after fixing the URL or on a later mount). The legacy widget showed an empty box.
 -   Bundled plugins (inlined as TS, registered on `window.CKEDITOR` before `CKEDITOR.replace`):
     -   `mendixlink` (`src/ckeditor4/mendixLinkPlugin.ts`) — port of the legacy `plugin.js` + `dialogs/mendixlink.js`,
         but writes the `data-mf` wire format.
@@ -234,6 +237,9 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 > -   `.mpk` 약 60KB (CKEditor를 번들하지 않고 런타임에 `<script>`로 로드). 기본 URL은
 >     `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` (레거시 vendoring 빌드 `preset: 'full'`와 동일한
 >     "full-all" 프리셋), 위젯의 "Editor script URL" 속성으로 자체 호스팅 URL 지정 가능 (오프라인/외부요청 차단 환경).
+> -   스크립트를 못 받으면(오프라인·방화벽·CSP) 경고 메시지 + 같은 속성에 바인딩된 `<textarea>`를 렌더 — 저장된 HTML을
+>     원본 소스로 계속 보고 편집할 수 있고, 스크립트가 로드되면(URL 수정 후 또는 다음 마운트 시) 서식 편집으로 복귀.
+>     레거시 위젯은 빈 박스만 나왔음.
 > -   `ckeditor4-react` npm 패키지는 **사용 안 함** (현재 메이저가 상용 LTS 라이선스에 묶여 있고 React `^18`만 선언). 대
 >     신 수동 `useEffect` 래퍼로 스크립트 주입 + `CKEDITOR.replace` + StrictMode 안전한 정리.
 > -   `mendixlink` / `pastebase64` 플러그인은 구 Dojo 위젯 소스를 TS로 인라인 포팅 (`mendixlink`는 신규 `data-mf` wire

@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useRef } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { CKEditorInstance, loadCKEditor } from "../ckeditor4/loadCKEditor";
 import { registerMendixLinkPlugin } from "../ckeditor4/mendixLinkPlugin";
 import { registerPasteBase64Plugin } from "../ckeditor4/pasteBase64Plugin";
@@ -38,6 +38,11 @@ export interface EditorProps extends ToolbarBooleans {
 
 const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
 
+const LOAD_ERROR_MESSAGE =
+    "The rich text editor could not be loaded (the CKEditor script did not load — offline, blocked by a firewall, or a " +
+    "Content-Security-Policy). You can view and edit the raw HTML below; formatting returns once the editor loads. " +
+    "See the browser console for details.";
+
 /**
  * Manual CKEditor 4 wrapper. The official `ckeditor4-react` package is not used:
  * its current majors are tied to the commercial LTS licence and only declare
@@ -50,6 +55,7 @@ export function Editor(props: EditorProps): ReactElement {
     const hostRef = useRef<HTMLDivElement>(null);
     const instanceRef = useRef<CKEditorInstance | null>(null);
     const lastEmitted = useRef(props.value);
+    const [loadError, setLoadError] = useState(false);
 
     const propsRef = useRef(props);
     useEffect(() => {
@@ -63,6 +69,7 @@ export function Editor(props: EditorProps): ReactElement {
             return;
         }
 
+        setLoadError(false);
         loadCKEditor(propsRef.current.scriptUrl)
             .then(CKEDITOR => {
                 if (destroyed) {
@@ -165,6 +172,9 @@ export function Editor(props: EditorProps): ReactElement {
             .catch(err => {
                 // eslint-disable-next-line no-console
                 console.error(err);
+                if (!destroyed) {
+                    setLoadError(true);
+                }
             });
 
         return () => {
@@ -212,7 +222,24 @@ export function Editor(props: EditorProps): ReactElement {
     return (
         <div className="rt-editor">
             {props.label ? <label className="control-label rt-editor__label">{props.label}</label> : null}
-            <div ref={hostRef} />
+            {loadError ? (
+                <div className="rt-editor__fallback">
+                    <p className="alert alert-warning rt-editor__error" role="alert">
+                        {LOAD_ERROR_MESSAGE}
+                    </p>
+                    <textarea
+                        className="form-control rt-editor__fallback-input"
+                        value={props.value}
+                        readOnly={props.disabled}
+                        rows={8}
+                        spellCheck={false}
+                        aria-label={props.label || "Rich text (HTML source)"}
+                        onChange={e => props.onChange(e.target.value)}
+                        onBlur={e => props.onBlur(e.target.value)}
+                    />
+                </div>
+            ) : null}
+            <div ref={hostRef} hidden={loadError} />
         </div>
     );
 }
