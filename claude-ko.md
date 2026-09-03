@@ -43,6 +43,19 @@ ES5 전용 — `"use strict"`, AMD `define([...])`, TypeScript/Babel/JSX 없음.
   `Test.mpk` 는 커밋된 산출물이지만 릴리스 시에만 의도적으로 갱신하며, 기능 커밋에는 포함하지 않음.
 - `origin` 은 fork `github.com/cldroddl/CKEditorForMendix`.
 
+## Pluggable 위젯 재작성 (`pluggable/`)
+
+React 재작성(`react-ver`, `ckeditor4-react` 브랜치)은 **지원하지 않는 위젯 문법을 제외하고는 기존 CKEditorForMendix
+위젯의 인터페이스(`src/CKEditorForMendix/CKEditorForMendix.xml`, `CKEditorViewerForMendix.xml`)와 동일하게 작성한다.**
+
+- 동일한 property `key`, `<caption>`, `<category>` / property group, 순서, `defaultValue`.
+- 동일한 `<enumerationValue>` key 와 라벨.
+- 동일한 object-list property (`microflowLinks`, `customToolbars`) 와 그 하위 property.
+
+새 스키마가 옛 구성을 정말로 표현할 수 없는 경우에만 벗어난다 (예: CKEditor 5 고유 개념, `type="microflow"` →
+`type="action"`, deprecated 속성). 벗어나야 할 때도 앱 개발자에게 보이는 caption/category 는 그대로 유지해 Mendix
+스튜디오에서 위젯 모습이 같도록 한다.
+
 ## 주의점 (Gotchas)
 
 - `npm install` 은 GitHub tarball 의존성(`widgetbuilder-gulp-helper`)을 받음 — 네트워크 접근 필요.

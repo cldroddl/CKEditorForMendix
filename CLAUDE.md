@@ -36,6 +36,20 @@ ES5 only — `"use strict"`, AMD `define([...])`, no TypeScript/Babel/JSX. Enfor
 - **Do not stage rebuilt `.mpk` files.** `dist/CKEditorForMendix.mpk`, `test/widgets/*.mpk`, and root `Test.mpk` are committed artifacts but are only updated deliberately on release, not in feature commits.
 - `origin` is the fork `github.com/cldroddl/CKEditorForMendix`.
 
+## Pluggable widget rewrite (`pluggable/`)
+
+The React rewrites (`react-ver`, `ckeditor4-react` branches) must reproduce the **original widget interface** as
+closely as the pluggable-widget XML schema allows. Match the legacy
+`src/CKEditorForMendix/CKEditorForMendix.xml` and `CKEditorViewerForMendix.xml`:
+
+- Same property `key`s, `<caption>`s, `<category>`s / property groups, order, `defaultValue`s.
+- Same `<enumerationValue>` keys and labels.
+- Same object-list properties (`microflowLinks`, `customToolbars`) and their sub-properties.
+
+Only deviate where the new schema genuinely can't express the old construct (e.g. CKEditor-5-specific
+concepts, `type="microflow"` → `type="action"`, deprecated attributes). When you must deviate, keep the
+caption/category the app developer sees unchanged so the widget looks the same in Mendix Studio.
+
 ## Gotchas
 
 - `npm install` pulls a GitHub tarball dependency (`widgetbuilder-gulp-helper`) — needs network access.
