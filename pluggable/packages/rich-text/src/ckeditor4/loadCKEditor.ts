@@ -73,10 +73,22 @@ function warnUrlMismatch(url: string): void {
     }
 }
 
+/**
+ * Global CKEditor config applied once, before any instance is created. CKEditor
+ * 4.22+ turns on a "this version is not secure" console error + notification for
+ * non-LTS builds; we ship a deliberately pinned 4.22.x, so silence it globally
+ * (the per-instance `versionCheck: false` in Editor.tsx is not always honoured
+ * because the check is wired on a global `instanceReady` listener).
+ */
+function applyGlobalConfig(CKEDITOR: CKEditorGlobal): CKEditorGlobal {
+    CKEDITOR.config.versionCheck = false;
+    return CKEDITOR;
+}
+
 export function loadCKEditor(url: string = getBundledCKEditorUrl()): Promise<CKEditorGlobal> {
     if (window.CKEDITOR) {
         warnUrlMismatch(url);
-        return Promise.resolve(window.CKEDITOR);
+        return Promise.resolve(applyGlobalConfig(window.CKEDITOR));
     }
     if (pending) {
         warnUrlMismatch(url);
@@ -96,7 +108,7 @@ export function loadCKEditor(url: string = getBundledCKEditorUrl()): Promise<CKE
         script.async = true;
         script.onload = () => {
             if (window.CKEDITOR) {
-                resolve(window.CKEDITOR);
+                resolve(applyGlobalConfig(window.CKEDITOR));
             } else {
                 reject(new Error("CKEditor 4 script loaded but window.CKEDITOR is undefined"));
             }

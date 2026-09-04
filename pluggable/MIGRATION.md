@@ -223,8 +223,11 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
     that stores and renders HTML this is a real risk — prefer `react-ver` (CKEditor 5) unless the licence is decisive.
 -   CKEditor 4 is a **global singleton** (`window.CKEDITOR`) — only one `ckeditor.js` per page. Fine for one widget; a
     second widget needing a different CKEditor build would conflict.
--   `config.versionCheck: false` is set to stop the CDN "update available" notification (CKEditor activated it for all
-    CDN loads on 2024-07-01).
+-   `versionCheck` is set to `false` both **globally** (`CKEDITOR.config.versionCheck` in `loadCKEditor`, right after
+    the script loads) and per instance. CKEditor 4.22+ shows a "this version is not secure" console error + in-editor
+    notification for any non-LTS build; the global setting is what actually suppresses it (the check is wired on a
+    global `instanceReady` listener that reads the merged config — a per-instance value alone is unreliable). We ship a
+    deliberately pinned 4.22.x, so the warning is noise; the risk itself is real and covered under "Known limits".
 -   `ckeditor4-react` (npm) deliberately unused — see "Editor loading" above.
 -   No inline `onclick` in stored HTML going forward (CSP + React). Legacy content is read-compatible; re-saved content
     is migrated to `data-mf`.
