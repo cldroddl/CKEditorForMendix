@@ -50,8 +50,12 @@ paid/commercial.
         but writes the `data-mf` wire format.
     -   `pastebase64` (`src/ckeditor4/pasteBase64Plugin.ts`) — verbatim port of the legacy MIT plugin; enabled when
         Image Mode = Base64.
--   From `full-all`: `divarea`, `tableresize`, `maximize`, `widget`, `codesnippet` (when code highlighting on),
-    `wordcount` (when Count plugin on).
+-   The bundled `ckeditor.js` is the **"standard-all"** distribution (fewer plugins compiled in than "full"), so
+    `Editor.tsx` `BASE_EXTRA_PLUGINS` explicitly loads the "full"-preset extras that legacy had — `font`, `colorbutton`
+    /`colordialog`, `justify`, `find`, `selectall`, `showblocks`, `div`, `bidi`, `indentblock`, `liststyle`, `iframe`,
+    `flash`, `pagebreak`, `smiley`, `templates`, `newpage`, `print`, `preview`, `forms`, `language`, `copyformatting`,
+    `dialogadvtab`, `autogrow` — plus `divarea`, `tableresize`, `maximize`, `widget`, and conditionally `codesnippet`
+    (code highlighting) / `wordcount` (Count plugin). All ship in `assets/ckeditor/plugins/`.
 -   **Not ported yet:** `oembed` / media embed (needs jQuery + a hosted `libs/`), image **upload** (`uploadimage` /
     `simple-image-browser`). `imagePasteMode="upload"` + `imageUploadMicroflow` are accepted in the XML but inert.
 

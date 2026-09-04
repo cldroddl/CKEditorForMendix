@@ -38,6 +38,46 @@ export interface EditorProps extends ToolbarBooleans {
 
 const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
 
+/**
+ * Plugins the widget always loads. The bundled `ckeditor.js` is the "standard-all"
+ * distribution (fewer plugins compiled in than "full"); the extras below are
+ * present as folders in `assets/ckeditor/plugins/` and give the same toolbar the
+ * legacy `preset: "full"` build had — Font, colours, Justify, Find/Replace,
+ * CreateDiv, Show blocks, forms, Iframe, Page break, Smiley, Templates, etc.
+ * Plus the always-on custom/behaviour plugins (`divarea`, `mendixlink`, …).
+ */
+const BASE_EXTRA_PLUGINS = [
+    "divarea",
+    "mendixlink",
+    "tableresize",
+    "maximize",
+    "widget",
+    "autogrow",
+    "font",
+    "colorbutton",
+    "colordialog",
+    "justify",
+    "find",
+    "selectall",
+    "showblocks",
+    "div",
+    "bidi",
+    "indentblock",
+    "liststyle",
+    "iframe",
+    "flash",
+    "pagebreak",
+    "smiley",
+    "templates",
+    "newpage",
+    "print",
+    "preview",
+    "forms",
+    "language",
+    "copyformatting",
+    "dialogadvtab"
+];
+
 const LOAD_ERROR_MESSAGE =
     "The rich text editor could not be loaded — the CKEditor script failed to load. You can view and edit the raw " +
     "HTML below in the meantime; formatting returns once the script loads. See the browser console for details.";
@@ -78,7 +118,7 @@ export function Editor(props: EditorProps): ReactElement {
                 registerPasteBase64Plugin();
 
                 const p = propsRef.current;
-                const extraPlugins = ["divarea", "mendixlink", "tableresize", "maximize", "widget"];
+                const extraPlugins = [...BASE_EXTRA_PLUGINS];
                 if (p.imagePasteMode === "base64") {
                     extraPlugins.push("pastebase64");
                 }
