@@ -18,11 +18,6 @@
         "dev:viewer": "npm run start --workspace @ckeditorformendix/rich-text-viewer",
         "release": "npm run release --workspaces --if-present",
         "lint": "npm run lint --workspaces --if-present",
-        "test": "npm run test --workspaces --if-present",
-        "assemble-ckeditor": "node scripts/assemble-ckeditor.mjs"
-    },
-    "devDependencies": {
-        "ckeditor-wordcount-plugin": "1.17.13",
-        "ckeditor4": "4.22.0"
+        "test": "npm run test --workspaces --if-present"
     }
 }

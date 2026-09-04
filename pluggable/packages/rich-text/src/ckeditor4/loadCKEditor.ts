@@ -4,21 +4,20 @@
  * its own plugins/skins/lang relative to `CKEDITOR.basePath`, so it must be
  * loaded as an external script rather than bundled.
  *
- * The widget loads CKEditor 4.22.0 from the **app's own static files** —
- * `<app>/ckeditor/ckeditor.js`, i.e. a `ckeditor/` folder the app developer
- * drops into `theme/web/`. Assemble that folder with
- * `pluggable/scripts/assemble-ckeditor.mjs` (`npm run assemble-ckeditor`).
- * No CDN, no external request, offline-safe. Bundling the build into the `.mpk`
- * was tried and reverted — the ~3000 files it extracts into `deployment/` trip
- * Windows file-locking on every redeploy (the app's `theme/web/` copy is synced
- * once and left alone, so it doesn't).
+ * The widget's build bundles a CKEditor 4.22.0 runtime into its own
+ * `assets/ckeditor/` (see `rollup.config.mjs`), so by default it loads from
+ * `<app>/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js` — same
+ * origin, no external request, offline-safe, like the legacy vendored widget.
+ * The bundled files are stamped with a fixed mtime so a rebuilt `.mpk` is
+ * byte-identical and Studio Pro's incremental deploy skips re-extracting them
+ * (avoids the Windows "file in use" lock on `editor.css`).
  */
 
-/** The CDN build, for reference / the assemble script — not loaded by default. */
+/** The CDN build — a valid override value for "Editor script URL", not the default. */
 export const CDN_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js";
 
-/** `theme/web/ckeditor/` deploys here; relative to the app root so deep links resolve. */
-const SELF_HOSTED_PATH = "ckeditor/ckeditor.js";
+/** Where the widget build drops the bundled CKEditor, relative to the app root. */
+const BUNDLED_PATH = "widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js";
 
 interface MxRuntime {
     remoteUrl?: string;
@@ -32,13 +31,13 @@ function appRoot(): string {
 
 /**
  * Turn the widget's "Editor script URL" value into an absolute URL:
- * empty -> the app's self-hosted copy; an absolute URL -> unchanged; anything
- * else -> resolved against the app root.
+ * empty -> the bundled copy; an absolute URL -> unchanged; anything else ->
+ * resolved against the app root.
  */
 export function resolveScriptUrl(raw: string | undefined): string {
     const value = raw?.trim();
     if (!value) {
-        return appRoot() + SELF_HOSTED_PATH;
+        return appRoot() + BUNDLED_PATH;
     }
     if (/^(https?:)?\/\//i.test(value)) {
         return value;

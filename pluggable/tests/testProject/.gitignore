@@ -27,9 +27,6 @@
 /widgets/ckeditorformendix.RichText.mpk
 /widgets/ckeditorformendix.RichTextViewer.mpk
 
-# CKEditor runtime for the editor — run `cd pluggable && npm run assemble-ckeditor -- tests/testProject/theme/web`
-/theme/web/ckeditor/
-
 # OS
 .DS_Store
 

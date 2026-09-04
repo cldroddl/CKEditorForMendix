@@ -285,9 +285,9 @@
             </property>
         </propertyGroup>
         <propertyGroup caption="Advanced">
-            <property key="editorScriptUrl" type="string" required="false" defaultValue="ckeditor/ckeditor.js">
+            <property key="editorScriptUrl" type="string" required="false">
                 <caption>Editor script URL</caption>
-                <description>Read-only. CKEditor 4.22.0 is loaded from the app's own static files at "ckeditor/ckeditor.js" (i.e. a "ckeditor" folder in theme/web). Assemble that folder with the widget repo's scripts/assemble-ckeditor.mjs and copy it into your app. No CDN / external request; works offline. If the folder is missing the editor shows a plain text box with the raw HTML instead.</description>
+                <description>Read-only. CKEditor 4.22.0 is bundled inside this widget and loaded from its own files — no CDN, no external request, works offline. (An advanced deployment can override this in the widget's code to load a shared copy, e.g. https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js.)</description>
             </property>
         </propertyGroup>
         <propertyGroup caption="Common">

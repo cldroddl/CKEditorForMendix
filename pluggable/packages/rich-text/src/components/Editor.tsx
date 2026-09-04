@@ -39,9 +39,8 @@ export interface EditorProps extends ToolbarBooleans {
 const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
 
 const LOAD_ERROR_MESSAGE =
-    "The rich text editor could not be loaded — the CKEditor script was not found. Copy a `ckeditor/` folder into the " +
-    "app's theme/web/ (run `npm run assemble-ckeditor` in the widget repo). You can view and edit the raw HTML below " +
-    "in the meantime; formatting returns once the script loads. See the browser console for details.";
+    "The rich text editor could not be loaded — the CKEditor script failed to load. You can view and edit the raw " +
+    "HTML below in the meantime; formatting returns once the script loads. See the browser console for details.";
 
 /**
  * Manual CKEditor 4 wrapper. The official `ckeditor4-react` package is not used:
