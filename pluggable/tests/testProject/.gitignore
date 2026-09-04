@@ -22,8 +22,8 @@
 # MPR v2 journal files
 /mprcontents/mprjournal*
 
-# Widgets built by this repo — run `cd pluggable && npm run build` to regenerate.
-# (Stock Marketplace widgets in /widgets/ stay committed so the project opens.)
+# Widgets built by this repo (build output) — run `cd pluggable && npm run build`.
+# Stock Marketplace widgets in /widgets/ stay committed so the project opens.
 /widgets/ckeditorformendix.RichText.mpk
 /widgets/ckeditorformendix.RichTextViewer.mpk
 

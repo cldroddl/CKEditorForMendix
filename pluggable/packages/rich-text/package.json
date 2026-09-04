@@ -34,9 +34,7 @@
         "classnames": "^2.5.1"
     },
     "devDependencies": {
-        "@mendix/pluggable-widgets-tools": ">=11.6.0 <11.13.0",
-        "ckeditor-wordcount-plugin": "1.17.13",
-        "ckeditor4": "4.22.0"
+        "@mendix/pluggable-widgets-tools": ">=11.6.0 <11.13.0"
     },
     "peerDependencies": {
         "react": "*",

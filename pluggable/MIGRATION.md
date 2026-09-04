@@ -34,12 +34,12 @@ paid/commercial.
     only declare React `^18`. Instead `src/components/Editor.tsx` is a hand-rolled `useEffect` wrapper —
     `loadCKEditor()` injects the script once, `CKEDITOR.replace()` on mount, guarded `destroy(true)` on unmount (handles
     React 19 StrictMode double-mount).
--   Default: the CKEditor 4.22.0 runtime the build bundled into `assets/ckeditor/` (see phase 6 below) — loaded from
-    `<app>/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js`, same origin, no external request, offline-safe,
-    like the legacy vendored widget. `config.versionCheck` is `false` (also stops CKEditor's own CDN "update" ping).
-    `config.allowedContent = true` — ACF off, so stored HTML is not stripped (parity with the legacy full build).
--   The **"Editor script URL"** widget property overrides the default with any other CKEditor 4.22.0 build — e.g.
-    `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`, or one copy shared across apps.
+-   Default script URL: `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` — the **"full-all"** preset, matching the
+    legacy widget's vendored build. `versionCheck` is forced `false` globally (see "Known limits"); `allowedContent = true`
+    — ACF off, so stored HTML is not stripped (parity with the legacy full build).
+-   The **"Editor script URL"** widget property overrides it. For offline / no-external-request deployments, host a
+    CKEditor 4.22.0 "full-all" build inside the Mendix app (e.g. `resources/ckeditor/ckeditor.js`) and point the property
+    at it. (Bundling the build into the `.mpk` was implemented and reverted — see phase 6.)
 -   If the script never loads (offline, firewall, CSP), the widget renders a warning plus a plain `<textarea>` bound to
     the same attribute — the stored HTML stays visible and editable as raw source, and formatting returns once the
     script loads (e.g. after fixing the URL or on a later mount). The legacy widget showed an empty box.
@@ -192,15 +192,14 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
     plugin. `videodetector` from the legacy `lib/plugins/` is **not** a candidate — it had no `plugin.js` and was never
     referenced by the legacy widget.
 
-6. ✅ **Self-hosted asset pipeline** — `packages/rich-text/rollup.config.mjs` (a custom config pwt merges over its own)
-   copies a CKEditor 4.22.0 runtime tree into `assets/ckeditor/` at build time, from two pinned dev dependencies:
-   `ckeditor4@4.22.0` (the "standard-all" distribution — most plugins + all languages inlined in `ckeditor.js`, the rest
-   under `plugins/`) and `ckeditor-wordcount-plugin` (MIT — `wordcount` is not in the CKEditor package). Only the
-   `moono-lisa` skin and no `samples/`/`dev/` are copied; the `.mpk` goes from ~65 KB to ~2.7 MB. With `editorScriptUrl`
-   empty, `getBundledCKEditorUrl()` points the loader at `<app>/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js`
-   — same origin, no external request, offline-safe, matching the legacy vendored widget. Setting `editorScriptUrl`
-   still overrides it (e.g. to the CDN or a copy shared across apps). `versionCheck: false` already suppresses
-   CKEditor's own CDN "update" ping.
+6. ⛔ **Self-hosted asset pipeline — tried and reverted.** A custom `rollup.config.mjs` copied a full CKEditor 4.22.0
+   tree into `assets/ckeditor/` at build time (dev deps `ckeditor4` + `ckeditor-wordcount-plugin`), making the `.mpk`
+   self-contained (~2.7 MB, ~3000 files) like the legacy widget. It built and passed `mx check`, but on **Windows**
+   `Run` fails with "The process cannot access the file … `assets/ckeditor/skins/moono-lisa/editor.css` … used by
+   another process" — Studio Pro re-extracts every widget file to `deployment/` on each deploy, and Windows locks the
+   open CSS (browser / a still-running app / antivirus) against overwrite. Fewer, larger files would reduce but not
+   remove the risk. **Left as documented manual self-hosting**: host a "full-all" build in `resources/` and set
+   `editorScriptUrl`. The `versionCheck` global fix (item below) was kept.
 7. **Review follow-ups** — `review-2026-09-03.md` C2/C4/C5/C8 partly addressed (C4 rejected-promise reset, C8 null
    guard, C2 emit only on real change); C1 handled via `allowedContent: true` (parity, not sanitization).
 
@@ -243,11 +242,10 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 >     사용 가능. 그래서 `rich-text` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
 > -   대가: CKEditor 4 오픈소스는 **2023년 6월 EOL** — 보안 패치 없음. 라이선스가 결정적이지 않다면 `react-ver`
 >     (CKEditor 5) 권장.
-> -   `.mpk` 약 2.7MB — 빌드 시 CKEditor 4.22.0 런타임을 위젯의 `assets/ckeditor/`에 번들 (dev 의존성
->     `ckeditor4@4.22.0` + `ckeditor-wordcount-plugin`(MIT)에서 복사, `rollup.config.mjs`). "Editor script URL"이
->     비어 있으면 `<app>/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js`를 로드 — same-origin, 외부
->     요청 0, 오프라인 OK (레거시 vendoring 위젯과 동일). "Editor script URL"에 값을 넣으면 다른 4.22.0 빌드(예: CDN)로
->     대체.
+> -   `.mpk` 약 64KB — CKEditor를 번들하지 않고 런타임에 `<script>`로 로드. 기본 URL은
+>     `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`, 위젯의 "Editor script URL" 속성으로 자체 호스팅 URL 지정
+>     가능 (오프라인/외부요청 차단 환경 — `resources/ckeditor/ckeditor.js` 등). CKEditor를 `.mpk`에 번들하는 방식은
+>     구현했다가 되돌림 — 추출 파일 ~3000개가 Windows 재배포 시 파일 잠금 에러를 유발 (phase 6 참고).
 > -   스크립트를 못 받으면(오프라인·방화벽·CSP) 경고 메시지 + 같은 속성에 바인딩된 `<textarea>`를 렌더 — 저장된 HTML을
 >     원본 소스로 계속 보고 편집할 수 있고, 스크립트가 로드되면(URL 수정 후 또는 다음 마운트 시) 서식 편집으로 복귀.
 >     레거시 위젯은 빈 박스만 나왔음.

@@ -7,11 +7,11 @@ Why: CKEditor 4.22.0 is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1, so it can be 
 licence key — unlike CKEditor 5 (GPL + mandatory key). Trade-off: CKEditor 4 open source is EOL since June 2023 (no
 security patches). See [`MIGRATION.md`](./MIGRATION.md) for the full rationale, property mapping, and wire format.
 
-The build **bundles CKEditor 4.22.0** into the widget's `assets/ckeditor/` (from the `ckeditor4` +
-`ckeditor-wordcount-plugin` dev dependencies — nothing vendored in git). By default the widget loads it from its own
-deployed assets — same origin, no external request, offline-safe, like the legacy widget. The **Editor script URL**
-property overrides this with any other CKEditor 4.22.0 build (e.g. `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`).
-`.mpk` is ~2.7 MB.
+The editor is **not bundled** — `ckeditor.js` (4.22.0 "full-all") is loaded at runtime from
+`https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` by default, or from the URL set in the widget's **Editor
+script URL** property. For offline use, host a "full-all" build inside your app (e.g. `resources/ckeditor/ckeditor.js`)
+and point that property at it. `.mpk` is ~64 KB. (Bundling CKEditor into the `.mpk` was tried and reverted — the ~3000
+extracted files trip Windows file-locking on redeploy; see `MIGRATION.md` phase 6.)
 
 ## Layout (npm workspaces)
 
@@ -121,9 +121,10 @@ shared 패키지·뷰어 위젯·워크스페이스·빌드 도구는 동일하�
 대가: CKEditor 4 오픈소스는 2023년 6월 EOL(보안 패치 없음).
 전체 근거·속성 매핑·wire 형식은 [`MIGRATION.md`](./MIGRATION.md) 참고.
 
-빌드가 **CKEditor 4.22.0을 위젯의 `assets/ckeditor/`에 번들**합니다 (`ckeditor4` + `ckeditor-wordcount-plugin` dev 의존성에서 복사 — git에 vendoring 없음).
-기본값은 위젯 자체 에셋에서 로드 — same-origin, 외부 요청 0, 오프라인 OK (레거시 위젯과 동일). **"Editor script URL"** 속성에 값을 넣으면 다른 4.22.0 빌드(예: `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`)로 대체됩니다.
-`.mpk`는 약 2.7MB입니다.
+에디터는 **번들하지 않습니다** — `ckeditor.js`(4.22.0 "full-all")를 런타임에 로드합니다.
+기본값은 `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`이고, 위젯의 **"Editor script URL"** 속성으로 변경할 수 있습니다.
+오프라인 환경은 "full-all" 빌드를 앱 안(`resources/ckeditor/ckeditor.js` 등)에 두고 그 URL을 속성에 넣으세요. `.mpk`는 약 64KB입니다.
+(CKEditor를 `.mpk`에 번들하는 방식은 구현했다가 되돌림 — 추출 파일 ~3000개가 Windows 재배포 시 파일 잠금 에러를 유발. `MIGRATION.md` phase 6 참고.)
 
 ## 구성 (npm workspaces)
 
