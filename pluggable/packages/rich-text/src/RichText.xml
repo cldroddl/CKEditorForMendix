@@ -285,9 +285,9 @@
             </property>
         </propertyGroup>
         <propertyGroup caption="Advanced">
-            <property key="editorScriptUrl" type="string" required="false">
+            <property key="editorScriptUrl" type="string" required="false" defaultValue="ckeditor/ckeditor.js">
                 <caption>Editor script URL</caption>
-                <description>URL of a CKEditor 4.22.0 "full-all" ckeditor.js. Leave empty to load 4.22.0 from the CKEditor CDN. For offline / no-external-request deployments, host a "full-all" build inside your app (e.g. resources/ckeditor/ckeditor.js) and put its URL here. This value is page-global: all RichText widgets on one page load a single CKEditor build (the first to load wins), so set the same value on every RichText widget on a page. (Not present in the legacy widget, which vendored CKEditor.)</description>
+                <description>Read-only. CKEditor 4.22.0 is loaded from the app's own static files at "ckeditor/ckeditor.js" (i.e. a "ckeditor" folder in theme/web). Assemble that folder with the widget repo's scripts/assemble-ckeditor.mjs and copy it into your app. No CDN / external request; works offline. If the folder is missing the editor shows a plain text box with the raw HTML instead.</description>
             </property>
         </propertyGroup>
         <propertyGroup caption="Common">

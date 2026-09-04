@@ -4,16 +4,47 @@
  * its own plugins/skins/lang relative to `CKEDITOR.basePath`, so it must be
  * loaded as an external script rather than bundled.
  *
- * Default URL is the "full-all" preset of the last open-source (GPL/LGPL/MPL)
- * build, 4.22.0, from the CKEditor CDN — matching the legacy widget's vendored
- * build (`preset: 'full'` + extras). For offline apps or to avoid the external
- * request, host a CKEditor 4.22.0 "full-all" build inside the Mendix app
- * (e.g. `resources/ckeditor/ckeditor.js`) and point the widget's "Editor script
- * URL" at it. (Bundling the build into the `.mpk` was tried and reverted — the
- * ~3000 extracted files trip Windows file-locking on redeploy.)
+ * The widget loads CKEditor 4.22.0 from the **app's own static files** —
+ * `<app>/ckeditor/ckeditor.js`, i.e. a `ckeditor/` folder the app developer
+ * drops into `theme/web/`. Assemble that folder with
+ * `pluggable/scripts/assemble-ckeditor.mjs` (`npm run assemble-ckeditor`).
+ * No CDN, no external request, offline-safe. Bundling the build into the `.mpk`
+ * was tried and reverted — the ~3000 files it extracts into `deployment/` trip
+ * Windows file-locking on every redeploy (the app's `theme/web/` copy is synced
+ * once and left alone, so it doesn't).
  */
 
-export const DEFAULT_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js";
+/** The CDN build, for reference / the assemble script — not loaded by default. */
+export const CDN_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js";
+
+/** `theme/web/ckeditor/` deploys here; relative to the app root so deep links resolve. */
+const SELF_HOSTED_PATH = "ckeditor/ckeditor.js";
+
+interface MxRuntime {
+    remoteUrl?: string;
+    appUrl?: string;
+}
+
+function appRoot(): string {
+    const mx = (window as unknown as { mx?: MxRuntime }).mx;
+    return (mx?.remoteUrl ?? mx?.appUrl ?? "/").replace(/\/?$/, "/");
+}
+
+/**
+ * Turn the widget's "Editor script URL" value into an absolute URL:
+ * empty -> the app's self-hosted copy; an absolute URL -> unchanged; anything
+ * else -> resolved against the app root.
+ */
+export function resolveScriptUrl(raw: string | undefined): string {
+    const value = raw?.trim();
+    if (!value) {
+        return appRoot() + SELF_HOSTED_PATH;
+    }
+    if (/^(https?:)?\/\//i.test(value)) {
+        return value;
+    }
+    return appRoot() + value.replace(/^\//, "");
+}
 
 interface CKEditorGlobal {
     replace(el: HTMLElement | string, config?: Record<string, unknown>): CKEditorInstance | null;
@@ -77,7 +108,7 @@ function applyGlobalConfig(CKEDITOR: CKEditorGlobal): CKEditorGlobal {
     return CKEDITOR;
 }
 
-export function loadCKEditor(url: string = DEFAULT_CKEDITOR_URL): Promise<CKEditorGlobal> {
+export function loadCKEditor(url: string = resolveScriptUrl(undefined)): Promise<CKEditorGlobal> {
     if (window.CKEDITOR) {
         warnUrlMismatch(url);
         return Promise.resolve(applyGlobalConfig(window.CKEDITOR));

@@ -7,11 +7,12 @@ Why: CKEditor 4.22.0 is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1, so it can be 
 licence key — unlike CKEditor 5 (GPL + mandatory key). Trade-off: CKEditor 4 open source is EOL since June 2023 (no
 security patches). See [`MIGRATION.md`](./MIGRATION.md) for the full rationale, property mapping, and wire format.
 
-The editor is **not bundled** — `ckeditor.js` (4.22.0 "full-all") is loaded at runtime from
-`https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` by default, or from the URL set in the widget's **Editor
-script URL** property. For offline use, host a "full-all" build inside your app (e.g. `resources/ckeditor/ckeditor.js`)
-and point that property at it. `.mpk` is ~64 KB. (Bundling CKEditor into the `.mpk` was tried and reverted — the ~3000
-extracted files trip Windows file-locking on redeploy; see `MIGRATION.md` phase 6.)
+CKEditor is **not in the `.mpk`** (~64 KB). The widget loads `ckeditor.js` from the **app's own static files** at
+`<app>/ckeditor/ckeditor.js`. To set that up: run `npm run assemble-ckeditor` in `pluggable/` and copy the resulting
+`ckeditor/` folder into your Mendix app's `theme/web/`. No CDN, no external request, offline-safe. The widget's
+**Editor script URL** property is read-only and already points there. (Bundling CKEditor into the `.mpk` was tried and
+reverted — Studio Pro re-extracts every widget file on each deploy and Windows locks the open `editor.css`; see
+`MIGRATION.md` phase 6.)
 
 ## Layout (npm workspaces)
 
@@ -71,7 +72,17 @@ confirm each editor's "Insert a Mendix microflow link" dialog shows its own list
 -   `npm run build`, then copy `packages/*/dist/<version>/*.mpk` into `<project>/widgets/` and in Studio Pro:
     right-click the app → **Update widgets**.
 
-**5. Run** — F5 in Studio Pro (App Settings → Runtime → _React client_ enabled, the 11.x default).
+**5. Add CKEditor to the app** — the editor loads `ckeditor.js` from `<app>/ckeditor/`, not from the `.mpk`:
+
+```
+cd pluggable && npm run assemble-ckeditor
+```
+
+Copy the resulting `pluggable/ckeditor-dist/ckeditor/` folder into `<project>/theme/web/` (so `theme/web/ckeditor/…`).
+Do this while Studio Pro's app is **stopped** (Windows locks these files once the app has served them). Without this
+folder the editor renders a plain textarea with the raw HTML.
+
+**6. Run** — F5 in Studio Pro (App Settings → Runtime → _React client_ enabled, the 11.x default).
 
 #### Alternative: scaffolding with `mxcli`
 
@@ -121,10 +132,10 @@ shared 패키지·뷰어 위젯·워크스페이스·빌드 도구는 동일하�
 대가: CKEditor 4 오픈소스는 2023년 6월 EOL(보안 패치 없음).
 전체 근거·속성 매핑·wire 형식은 [`MIGRATION.md`](./MIGRATION.md) 참고.
 
-에디터는 **번들하지 않습니다** — `ckeditor.js`(4.22.0 "full-all")를 런타임에 로드합니다.
-기본값은 `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`이고, 위젯의 **"Editor script URL"** 속성으로 변경할 수 있습니다.
-오프라인 환경은 "full-all" 빌드를 앱 안(`resources/ckeditor/ckeditor.js` 등)에 두고 그 URL을 속성에 넣으세요. `.mpk`는 약 64KB입니다.
-(CKEditor를 `.mpk`에 번들하는 방식은 구현했다가 되돌림 — 추출 파일 ~3000개가 Windows 재배포 시 파일 잠금 에러를 유발. `MIGRATION.md` phase 6 참고.)
+CKEditor는 **`.mpk`에 없습니다** (~64KB). 위젯은 `ckeditor.js`를 **앱의 정적 파일** `<app>/ckeditor/ckeditor.js`에서 로드합니다.
+설정: `pluggable/`에서 `npm run assemble-ckeditor` 실행 → 생성된 `ckeditor/` 폴더를 Mendix 앱의 `theme/web/`에 복사.
+CDN·외부요청 없음, 오프라인 OK. 위젯의 **"Editor script URL"** 속성은 읽기 전용이고 이미 거길 가리킵니다.
+(CKEditor를 `.mpk`에 번들하는 방식은 구현했다가 되돌림 — Studio Pro가 매 배포마다 위젯 파일을 재추출하는데 Windows가 열린 `editor.css`를 잠금. `MIGRATION.md` phase 6 참고.)
 
 ## 구성 (npm workspaces)
 
@@ -180,7 +191,17 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
 -   `npm run build` 후 `packages/*/dist/<version>/*.mpk`를 `<project>/widgets/`에 복사 → Studio Pro에서 앱 우클릭 →
     **Update widgets**
 
-**5. 실행** — Studio Pro에서 F5 (App Settings → Runtime → _React client_ 활성, 11.x 기본값)
+**5. 앱에 CKEditor 넣기** — 에디터는 `ckeditor.js`를 `.mpk`가 아니라 `<app>/ckeditor/`에서 로드합니다:
+
+```
+cd pluggable && npm run assemble-ckeditor
+```
+
+생성된 `pluggable/ckeditor-dist/ckeditor/` 폴더를 `<project>/theme/web/`에 복사 (→ `theme/web/ckeditor/…`).
+**Studio Pro 앱을 정지한 상태에서** 하세요 (앱이 한 번 서빙하면 Windows가 이 파일들을 잠급니다). 이 폴더가 없으면
+에디터는 원본 HTML이 담긴 textarea로 표시됩니다.
+
+**6. 실행** — Studio Pro에서 F5 (App Settings → Runtime → _React client_ 활성, 11.x 기본값)
 
 #### 대안: `mxcli`로 스캐폴딩
 

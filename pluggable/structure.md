@@ -112,7 +112,7 @@ src/
 ├── components/
 │   └── Editor.tsx             ★ React ↔ CKEditor 4 래퍼 (CKEDITOR.replace 호출, 정리, 이벤트)
 ├── ckeditor4/                 CKEditor 4 관련 코드 (전부 TypeScript)
-│   ├── loadCKEditor.ts        ckeditor.js를 CDN/URL에서 1회 로드, 전역 window.CKEDITOR 관리
+│   ├── loadCKEditor.ts        ckeditor.js를 <app>/ckeditor/에서 1회 로드, 전역 window.CKEDITOR 관리
 │   ├── mendixLinkPlugin.ts    "Insert Mendix microflow link" 커스텀 플러그인 (버튼+메뉴+다이얼로그)
 │   ├── pasteBase64Plugin.ts   이미지 base64 붙여넣기 플러그인
 │   └── buildToolbar.ts        14개 toolbar* 불리언 + customToolbars → CKEditor config 변환
@@ -122,10 +122,9 @@ src/
 └── package.xml                .mpk 매니페스트 (clientModule 이름 = ckeditorformendix.richtext.RichText)
 ```
 
--   **CKEditor 4 엔진은 `.mpk`에 없습니다.** 런타임에 `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`(또는
-    `editorScriptUrl` 속성에 지정한 자체 호스팅 URL)에서 `<script>`로 로드. (번들하는 방식은 시도했다가 Windows
-    재배포 파일 잠금 문제로 되돌림 — `MIGRATION.md` phase 6.)
--   `editorScriptUrl`이 비어 있으면 CDN 사용. 오프라인이면 "full-all" 빌드를 앱 `resources/`에 두고 그 URL 지정.
+-   **CKEditor 4 엔진은 `.mpk`에 없습니다.** 앱의 정적 파일 `<app>/ckeditor/ckeditor.js`에서 `<script>`로 로드
+    (`ckeditor/` 폴더는 `npm run assemble-ckeditor`로 만들어 앱 `theme/web/`에 복사). "Editor script URL" 속성은
+    읽기 전용. (`.mpk`에 번들하는 방식은 Windows 재배포 파일 잠금 때문에 되돌림 — `MIGRATION.md` phase 6.)
 -   한 페이지에 에디터가 여러 개 있어도 `ckeditor.js`는 한 번만 로드되고, 인스턴스별로 `CKEDITOR.replace(element, config)`에 설정을 따로 넘깁니다.
 
 ### 4.3 `packages/rich-text-viewer` — 뷰어 위젯
@@ -193,7 +192,7 @@ packages/<widget>/dist/<version>/
 ```
 
 -   **위젯 하나당 `.mpk` 하나.** 레거시는 한 `.mpk`에 에디터+뷰어를 같이 담았지만, pwt는 npm 패키지 = `.mpk` 1:1이라 파일이 두 개입니다. 앱에는 둘 다 임포트합니다.
--   `.mpk`는 작습니다 (에디터 ~64KB, 뷰어 ~26KB). CKEditor 엔진은 포함 안 됨 — 런타임에 CDN/URL에서 로드.
+-   `.mpk`는 작습니다 (에디터 ~64KB, 뷰어 ~26KB). CKEditor 엔진은 포함 안 됨 — 앱 `theme/web/ckeditor/`에서 로드.
 -   `RichText.js`(AMD) / `RichText.mjs`(ESM) **이중 출력**은 pwt가 자동으로 만듭니다. 소스가 아니라 빌드 결과물입니다.
 -   `typings/RichTextProps.d.ts`는 `RichText.xml`에서 **자동 생성**되는 타입. `RichText.tsx`가 이걸 `props` 타입으로 씁니다. XML을 고치면 타입도 바뀝니다.
 

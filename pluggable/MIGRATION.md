@@ -34,12 +34,15 @@ paid/commercial.
     only declare React `^18`. Instead `src/components/Editor.tsx` is a hand-rolled `useEffect` wrapper —
     `loadCKEditor()` injects the script once, `CKEDITOR.replace()` on mount, guarded `destroy(true)` on unmount (handles
     React 19 StrictMode double-mount).
--   Default script URL: `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js` — the **"full-all"** preset, matching the
-    legacy widget's vendored build. `versionCheck` is forced `false` globally (see "Known limits"); `allowedContent = true`
-    — ACF off, so stored HTML is not stripped (parity with the legacy full build).
--   The **"Editor script URL"** widget property overrides it. For offline / no-external-request deployments, host a
-    CKEditor 4.22.0 "full-all" build inside the Mendix app (e.g. `resources/ckeditor/ckeditor.js`) and point the property
-    at it. (Bundling the build into the `.mpk` was implemented and reverted — see phase 6.)
+-   CKEditor is loaded from the **app's own static files**: `<app>/ckeditor/ckeditor.js` (a `ckeditor/` folder the app
+    developer drops into `theme/web/` — assemble it with `pluggable/scripts/assemble-ckeditor.mjs`). No CDN, no external
+    request, offline-safe. `resolveScriptUrl()` resolves the path against `mx.remoteUrl`. `versionCheck` is forced
+    `false` globally (see "Known limits"); `allowedContent = true` — ACF off, so stored HTML is not stripped (parity
+    with the legacy full build).
+-   The **"Editor script URL"** property is **read-only** (`RichText.editorConfig.ts`) and shows the fixed
+    `ckeditor/ckeditor.js`. Why static files and not the `.mpk`: bundling was implemented and reverted — Studio Pro
+    re-extracts every widget `.mpk` file into `deployment/` on each deploy, and on Windows that fails on any file the
+    running app / browser holds open (`editor.css`); a `theme/web/` copy is synced once and left alone. See phase 6.
 -   If the script never loads (offline, firewall, CSP), the widget renders a warning plus a plain `<textarea>` bound to
     the same attribute — the stored HTML stays visible and editable as raw source, and formatting returns once the
     script loads (e.g. after fixing the URL or on a later mount). The legacy widget showed an empty box.
@@ -192,14 +195,20 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
     plugin. `videodetector` from the legacy `lib/plugins/` is **not** a candidate — it had no `plugin.js` and was never
     referenced by the legacy widget.
 
-6. ⛔ **Self-hosted asset pipeline — tried and reverted.** A custom `rollup.config.mjs` copied a full CKEditor 4.22.0
-   tree into `assets/ckeditor/` at build time (dev deps `ckeditor4` + `ckeditor-wordcount-plugin`), making the `.mpk`
-   self-contained (~2.7 MB, ~3000 files) like the legacy widget. It built and passed `mx check`, but on **Windows**
-   `Run` fails with "The process cannot access the file … `assets/ckeditor/skins/moono-lisa/editor.css` … used by
-   another process" — Studio Pro re-extracts every widget file to `deployment/` on each deploy, and Windows locks the
-   open CSS (browser / a still-running app / antivirus) against overwrite. Fewer, larger files would reduce but not
-   remove the risk. **Left as documented manual self-hosting**: host a "full-all" build in `resources/` and set
-   `editorScriptUrl`. The `versionCheck` global fix (item below) was kept.
+6. ✅ **Self-hosted CKEditor via `theme/web/`.** `pluggable/scripts/assemble-ckeditor.mjs`
+   (`npm run assemble-ckeditor [-- <dir>]`) assembles a CKEditor 4.22.0 runtime (dev deps `ckeditor4` +
+   `ckeditor-wordcount-plugin`, `moono-lisa` skin only, no samples) into a `ckeditor/` folder. The app developer copies
+   that into `theme/web/`, so it deploys to `<app>/ckeditor/`; the widget loads `<app>/ckeditor/ckeditor.js` and the
+   "Editor script URL" property is read-only.
+
+    First attempt (reverted): a custom `rollup.config.mjs` copied the same tree into the widget's `assets/ckeditor/` so
+    the `.mpk` was self-contained (~2.7 MB, ~3000 files). It built and passed `mx check` but broke Windows `Run` —
+    Studio Pro re-extracts every widget file into `deployment/` on each deploy, and Windows refuses to overwrite any
+    file the running app / browser holds open (`editor.css`). The legacy widget avoided this only because its vendored
+    `.mpk` was a frozen committed artifact with stable timestamps, so Studio Pro's incremental extract skipped it. A
+    `theme/web/` copy is synced separately and once — same robustness without shipping a rebuilt tree in the `.mpk`.
+    The `versionCheck` global fix (item below) was kept from that attempt.
+
 7. **Review follow-ups** — `review-2026-09-03.md` C2/C4/C5/C8 partly addressed (C4 rejected-promise reset, C8 null
    guard, C2 emit only on real change); C1 handled via `allowedContent: true` (parity, not sanitization).
 
@@ -242,10 +251,11 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 >     사용 가능. 그래서 `rich-text` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
 > -   대가: CKEditor 4 오픈소스는 **2023년 6월 EOL** — 보안 패치 없음. 라이선스가 결정적이지 않다면 `react-ver`
 >     (CKEditor 5) 권장.
-> -   `.mpk` 약 64KB — CKEditor를 번들하지 않고 런타임에 `<script>`로 로드. 기본 URL은
->     `https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js`, 위젯의 "Editor script URL" 속성으로 자체 호스팅 URL 지정
->     가능 (오프라인/외부요청 차단 환경 — `resources/ckeditor/ckeditor.js` 등). CKEditor를 `.mpk`에 번들하는 방식은
->     구현했다가 되돌림 — 추출 파일 ~3000개가 Windows 재배포 시 파일 잠금 에러를 유발 (phase 6 참고).
+> -   `.mpk` 약 64KB — CKEditor는 **앱의 정적 파일**(`<app>/ckeditor/ckeditor.js`)에서 로드. 앱 개발자가
+>     `pluggable/scripts/assemble-ckeditor.mjs`(`npm run assemble-ckeditor`)로 `ckeditor/` 폴더를 만들어 앱
+>     `theme/web/`에 복사. CDN·외부요청 없음, 오프라인 OK. "Editor script URL" 속성은 읽기 전용. CKEditor를 `.mpk`에
+>     번들하는 방식은 구현했다가 되돌림 — Studio Pro가 매 배포마다 위젯 파일을 `deployment/`로 재추출하는데, Windows는
+>     실행 중인 앱/브라우저가 연 `editor.css`를 덮어쓰지 못함. `theme/web/`는 한 번만 동기화됨 (phase 6 참고).
 > -   스크립트를 못 받으면(오프라인·방화벽·CSP) 경고 메시지 + 같은 속성에 바인딩된 `<textarea>`를 렌더 — 저장된 HTML을
 >     원본 소스로 계속 보고 편집할 수 있고, 스크립트가 로드되면(URL 수정 후 또는 다음 마운트 시) 서식 편집으로 복귀.
 >     레거시 위젯은 빈 박스만 나왔음.

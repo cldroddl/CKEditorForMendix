@@ -13,6 +13,7 @@ interface Property {
     caption: string;
     objectHeaders?: string[];
     settings?: object;
+    readOnly?: boolean;
 }
 
 interface Problem {
@@ -52,6 +53,8 @@ export function getProperties(values: RichTextPreviewProps, defaultProperties: P
     if (!values.showLabel) {
         hideProperty(defaultProperties, "fieldCaption");
     }
+    // The script location is fixed (app's theme/web/ckeditor/); show it but don't let it be edited.
+    setReadOnly(defaultProperties, "editorScriptUrl");
     return defaultProperties;
 }
 
@@ -81,6 +84,19 @@ function hideProperty(groups: Properties, key: string): void {
         }
         if (group.propertyGroups) {
             hideProperty(group.propertyGroups, key);
+        }
+    }
+}
+
+function setReadOnly(groups: Properties, key: string): void {
+    for (const group of groups) {
+        group.properties?.forEach(p => {
+            if (p.key === key) {
+                p.readOnly = true;
+            }
+        });
+        if (group.propertyGroups) {
+            setReadOnly(group.propertyGroups, key);
         }
     }
 }

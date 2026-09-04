@@ -5,6 +5,9 @@ coverage/
 .turbo/
 *.tsbuildinfo
 
+# `npm run assemble-ckeditor` output
+ckeditor-dist/
+
 # Local Mendix test projects (packages/*/config.projectPath).
 # tests/testProject is committed as a real Mendix test app — its own
 # tests/testProject/.gitignore applies the standard Mendix excludes, and the
