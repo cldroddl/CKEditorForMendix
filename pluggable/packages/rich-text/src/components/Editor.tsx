@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useRef, useState } from "react";
-import { CKEditorInstance, loadCKEditor } from "../ckeditor4/loadCKEditor";
+import { CKEditorInstance, ForeignCKEditorError, loadCKEditor } from "../ckeditor4/loadCKEditor";
 import { registerMendixLinkPlugin } from "../ckeditor4/mendixLinkPlugin";
 import { registerPasteBase64Plugin } from "../ckeditor4/pasteBase64Plugin";
 import { buildCustomToolbar, buildToolbarGroups, CustomToolbarItem, ToolbarBooleans } from "../ckeditor4/buildToolbar";
@@ -81,9 +81,17 @@ const BASE_EXTRA_PLUGINS = [
     "dialogadvtab"
 ];
 
-const LOAD_ERROR_MESSAGE =
-    "The rich text editor could not be loaded — the CKEditor script failed to load. You can view and edit the raw " +
-    "HTML below in the meantime; formatting returns once the script loads. See the browser console for details.";
+type LoadError = null | "load-failed" | "foreign-ckeditor";
+
+const LOAD_ERROR_MESSAGE: Record<Exclude<LoadError, null>, string> = {
+    "load-failed":
+        "The rich text editor could not be loaded — the CKEditor script failed to load. You can view and edit the raw " +
+        "HTML below in the meantime; formatting returns once the script loads. See the browser console for details.",
+    "foreign-ckeditor":
+        "The rich text editor could not be loaded — a different CKEditor build is already running on this page " +
+        '(usually the legacy "CKEditor for Mendix" Dojo widget). CKEditor 4 allows only one build per page. Remove the ' +
+        "legacy widget from the app. You can view and edit the raw HTML below in the meantime."
+};
 
 /**
  * Manual CKEditor 4 wrapper. The official `ckeditor4-react` package is not used:
@@ -97,7 +105,7 @@ export function Editor(props: EditorProps): ReactElement {
     const hostRef = useRef<HTMLDivElement>(null);
     const instanceRef = useRef<CKEditorInstance | null>(null);
     const lastEmitted = useRef(props.value);
-    const [loadError, setLoadError] = useState(false);
+    const [loadError, setLoadError] = useState<LoadError>(null);
 
     const propsRef = useRef(props);
     useEffect(() => {
@@ -111,7 +119,7 @@ export function Editor(props: EditorProps): ReactElement {
             return;
         }
 
-        setLoadError(false);
+        setLoadError(null);
         loadCKEditor(propsRef.current.scriptUrl)
             .then(CKEDITOR => {
                 if (destroyed) {
@@ -211,11 +219,11 @@ export function Editor(props: EditorProps): ReactElement {
                 instance.on("change", emit);
                 instance.on("blur", () => propsRef.current.onBlur(instance.getData()));
             })
-            .catch(err => {
+            .catch((err: ForeignCKEditorError | Error) => {
                 // eslint-disable-next-line no-console
                 console.error(err);
                 if (!destroyed) {
-                    setLoadError(true);
+                    setLoadError("code" in err && err.code === "foreign-ckeditor" ? "foreign-ckeditor" : "load-failed");
                 }
             });
 
@@ -267,7 +275,7 @@ export function Editor(props: EditorProps): ReactElement {
             {loadError ? (
                 <div className="rt-editor__fallback">
                     <p className="alert alert-warning rt-editor__error" role="alert">
-                        {LOAD_ERROR_MESSAGE}
+                        {LOAD_ERROR_MESSAGE[loadError]}
                     </p>
                     <textarea
                         className="form-control rt-editor__fallback-input"
@@ -281,7 +289,7 @@ export function Editor(props: EditorProps): ReactElement {
                     />
                 </div>
             ) : null}
-            <div ref={hostRef} hidden={loadError} />
+            <div ref={hostRef} hidden={loadError !== null} />
         </div>
     );
 }

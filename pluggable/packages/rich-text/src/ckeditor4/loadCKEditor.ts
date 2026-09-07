@@ -19,6 +19,29 @@ export const CDN_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckedit
 /** Where the widget build drops the bundled CKEditor, relative to the app root. */
 const BUNDLED_PATH = "widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js";
 
+/** The exact CKEditor version this widget bundles (keep in sync with `rollup.config.mjs`). */
+export const BUNDLED_CKEDITOR_VERSION = "4.22.0";
+
+/**
+ * Thrown when `window.CKEDITOR` is already owned by a different CKEditor build —
+ * almost always the legacy Dojo `CKEditorForMendix` widget's bundled 4.10. CKEditor
+ * 4 is a hard `window.CKEDITOR` page singleton: we can neither load our own 4.22
+ * alongside it nor safely reuse a foreign core (its plugin set / basePath / skin
+ * differ, so `CKEDITOR.replace` 404s on plugins it lacks). The editor falls back
+ * to a raw-HTML `<textarea>` and surfaces this message.
+ */
+export class ForeignCKEditorError extends Error {
+    readonly code = "foreign-ckeditor";
+    constructor(public readonly foreignVersion: string | undefined) {
+        super(
+            `A different CKEditor build (v${foreignVersion ?? "unknown"}) is already loaded on this page. ` +
+                `The legacy "CKEditor for Mendix" Dojo widget cannot share a page with this one — remove the legacy ` +
+                `widget from the app (see the widget README).`
+        );
+        this.name = "ForeignCKEditorError";
+    }
+}
+
 interface MxRuntime {
     remoteUrl?: string;
     appUrl?: string;
@@ -51,6 +74,7 @@ interface CKEditorGlobal {
     instances: Record<string, CKEditorInstance | undefined>;
     on(event: string, listener: () => void): void;
     status: string;
+    version?: string;
     plugins: {
         registered: Record<string, unknown>;
         add(name: string, def: Record<string, unknown>): void;
@@ -109,8 +133,16 @@ function applyGlobalConfig(CKEDITOR: CKEditorGlobal): CKEditorGlobal {
 
 export function loadCKEditor(url: string = resolveScriptUrl(undefined)): Promise<CKEditorGlobal> {
     if (window.CKEDITOR) {
+        const existing = window.CKEDITOR;
+        // Reuse only a core we loaded ourselves, or a byte-identical build (same
+        // exact version) someone else already put on the page. A different build
+        // (legacy 4.10 Dojo widget, a mismatched CDN copy) cannot be reused —
+        // fail loud so the editor shows the raw-HTML fallback instead of 404ing.
+        if (!loadedFrom && existing.version !== BUNDLED_CKEDITOR_VERSION) {
+            return Promise.reject(new ForeignCKEditorError(existing.version));
+        }
         warnUrlMismatch(url);
-        return Promise.resolve(applyGlobalConfig(window.CKEDITOR));
+        return Promise.resolve(applyGlobalConfig(existing));
     }
     if (pending) {
         warnUrlMismatch(url);

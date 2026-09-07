@@ -93,8 +93,11 @@ GET /widgets/CKEditorForMendix/widget/lib/plugins/copyformatting/plugin.js 404
 **Fix: remove the legacy widget from the app entirely** (this widget is its replacement, not a companion) — see the
 "Replaces the legacy widget" section in `README.md` for the removal steps.
 
-A code-side guard (detect a foreign `window.CKEDITOR`, refuse to reuse it, fall back to the raw-HTML `<textarea>` with
-a clear message instead of 404 spam) is a planned follow-up, not yet implemented.
+A code-side guard exists so the failure is graceful, not a 404 storm: `loadCKEditor()` reuses `window.CKEDITOR` only
+when this widget loaded it or its `version` exactly matches the bundled `4.22.0`; any other build (legacy 4.10, a
+mismatched CDN copy) throws `ForeignCKEditorError` and the editor renders the raw-HTML `<textarea>` fallback with a
+"remove the legacy widget" message. It does **not** make the two widgets work together — that is impossible with the
+CKEditor 4 singleton — it just replaces the broken toolbar with an actionable message.
 
 ## Widgets
 
@@ -298,7 +301,10 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 >     그러면 `loadCKEditor()`가 그 낡은 코어를 재사용 → 4.10에 없는 `BASE_EXTRA_PLUGINS`를 레거시 경로에서
 >     lazy-load 시도 → `plugins/autogrow/plugin.js` 등 `404`, 툴바 깨짐. **해결: 레거시 위젯을 앱에서 완전히 제거**
 >     (이 위젯이 레거시의 교체품이지 병행 대상이 아님) — 제거 절차는 `README.md`의 "레거시 위젯을 대체함" 절 참고.
->     코드 측 가드(외부 `window.CKEDITOR` 감지 시 재사용 거부 + `<textarea>` fallback)는 예정된 후속 작업.
+>     코드 측 가드 있음: `loadCKEditor()`는 우리가 로드했거나 `version`이 번들 `4.22.0`과 정확히 일치할 때만
+>     `window.CKEDITOR`를 재사용하고, 그 외 빌드(레거시 4.10 등)는 `ForeignCKEditorError`를 던져 에디터가
+>     raw-HTML `<textarea>` fallback + "레거시 위젯 제거" 메시지를 표시함. 두 위젯을 같이 동작시켜 주지는 않음
+>     (CKEditor 4 싱글톤이라 불가능) — 깨진 툴바 대신 실행 가능한 안내로 바꿔줄 뿐.
 >
 > **위젯 XML은 레거시 인터페이스를 그대로 재현합니다** — `src/CKEditorForMendix/CKEditorForMendix.xml` /
 > `CKEditorViewerForMendix.xml`의 property key·caption·기본값·enum·순서·그룹 동일. `<category>`는 pluggable에서
