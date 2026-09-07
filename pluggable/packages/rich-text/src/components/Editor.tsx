@@ -45,6 +45,10 @@ const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
  * legacy `preset: "full"` build had — Font, colours, Justify, Find/Replace,
  * CreateDiv, Show blocks, forms, Iframe, Page break, Smiley, Templates, etc.
  * Plus the always-on custom/behaviour plugins (`divarea`, `mendixlink`, …).
+ *
+ * `flash` is intentionally NOT here: the legacy widget ran CKEditor 4.10, but
+ * 4.11+ deprecated the plugin (it emits `editor-plugin-deprecated` on init) and
+ * no browser runs Flash any more.
  */
 const BASE_EXTRA_PLUGINS = [
     "divarea",
@@ -65,7 +69,6 @@ const BASE_EXTRA_PLUGINS = [
     "indentblock",
     "liststyle",
     "iframe",
-    "flash",
     "pagebreak",
     "smiley",
     "templates",

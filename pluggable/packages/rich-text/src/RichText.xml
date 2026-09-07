@@ -138,7 +138,12 @@
                                 <enumerationValue key="CreateDiv">Create Div</enumerationValue>
                                 <enumerationValue key="Cut">Cut</enumerationValue>
                                 <enumerationValue key="Find">Find</enumerationValue>
+                                <!-- Flash: removed. Legacy ran CKEditor 4.10, but the `flash` plugin was
+                                     deprecated in 4.11+ (emits `editor-plugin-deprecated`) and no browser runs
+                                     Flash any more, so it is not in `BASE_EXTRA_PLUGINS`. Selecting it here would
+                                     just yield a missing button.
                                 <enumerationValue key="Flash">Flash</enumerationValue>
+                                -->
                                 <enumerationValue key="Font">Font</enumerationValue>
                                 <enumerationValue key="FontSize">Font Size</enumerationValue>
                                 <enumerationValue key="Form">Form</enumerationValue>

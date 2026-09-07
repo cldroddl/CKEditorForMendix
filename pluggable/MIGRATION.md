@@ -53,9 +53,11 @@ paid/commercial.
 -   The bundled `ckeditor.js` is the **"standard-all"** distribution (fewer plugins compiled in than "full"), so
     `Editor.tsx` `BASE_EXTRA_PLUGINS` explicitly loads the "full"-preset extras that legacy had — `font`, `colorbutton`
     /`colordialog`, `justify`, `find`, `selectall`, `showblocks`, `div`, `bidi`, `indentblock`, `liststyle`, `iframe`,
-    `flash`, `pagebreak`, `smiley`, `templates`, `newpage`, `print`, `preview`, `forms`, `language`, `copyformatting`,
+    `pagebreak`, `smiley`, `templates`, `newpage`, `print`, `preview`, `forms`, `language`, `copyformatting`,
     `dialogadvtab`, `autogrow` — plus `divarea`, `tableresize`, `maximize`, `widget`, and conditionally `codesnippet`
     (code highlighting) / `wordcount` (Count plugin). All ship in `assets/ckeditor/plugins/`.
+    `flash` is deliberately excluded — legacy ran CKEditor 4.10, but 4.11+ deprecated it (`editor-plugin-deprecated`)
+    and no browser runs Flash.
 -   **Not ported yet:** `oembed` / media embed (needs jQuery + a hosted `libs/`), image **upload** (`uploadimage` /
     `simple-image-browser`). `imagePasteMode="upload"` + `imageUploadMicroflow` are accepted in the XML but inert.
 

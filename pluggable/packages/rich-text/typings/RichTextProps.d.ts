@@ -25,7 +25,6 @@ export type CtItemTypeEnum =
     | "CreateDiv"
     | "Cut"
     | "Find"
-    | "Flash"
     | "Font"
     | "FontSize"
     | "Form"
