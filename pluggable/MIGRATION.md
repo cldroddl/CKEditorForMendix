@@ -248,7 +248,8 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
     The `versionCheck` global fix (item below) also came from this work.
 
 7. **Review follow-ups** — `review-2026-09-03.md` C2/C4/C5/C8 partly addressed (C4 rejected-promise reset, C8 null
-   guard, C2 emit only on real change); C1 handled via `allowedContent: true` (parity, not sanitization).
+   guard, C2 emit only on real change); C1 (`allowedContent: true` — editor parity, not sanitization) is now backed by
+   viewer-side DOMPurify (`[상속-1]` closed), so ACF-off is an accepted posture.
 
 ### Build/tooling notes
 
@@ -265,8 +266,18 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
     (`node_modules/ckeditor4/package.json` confirms). Under LGPL/MPL it can be used in a proprietary Mendix app with no
     licence key and no copyleft on the app — the same footing the legacy Dojo widget relied on. The `rich-text` package
     stays `Apache-2.0`.
--   **Security**: CKEditor 4 open source is **EOL (June 2023)**. 4.22.0 will not receive security patches. For an editor
-    that stores and renders HTML this is a real risk — prefer `react-ver` (CKEditor 5) unless the licence is decisive.
+-   **Security**: CKEditor 4 open source is **EOL (June 2023)**. 4.22.0 will not receive security patches. Since the
+    editor runs `allowedContent: true` (ACF off), hostile markup pasted / imported / written by a microflow is stored
+    verbatim. The **viewer now sanitizes stored HTML with DOMPurify** (`shared/src/sanitizeHtml.ts`,
+    `sanitizeRichText`) right before render — after `migrateStoredValue` (which needs the legacy inline `onclick` that
+    DOMPurify strips). `<script>`, `on*` handlers, `javascript:` URLs, `<style>` blocks, inline `<svg>`/MathML and
+    `<iframe>` are removed; `data:image/svg+xml` is dropped off `<img src>` (raster base64 is kept); `target="_blank"`
+    links gain `rel="noopener noreferrer"`. Everything the editor legitimately produces (microflow-link anchors,
+    `data-image-guid`, tables, font/colour spans, code blocks, forms) is preserved. A viewer property **`Sanitize
+    HTML`** (group *Security*, default **on**) lets an app opt out for fully-trusted content that needs stripped
+    markup — widen `BASE_CONFIG` before reaching for the toggle. The editor save path is **not** sanitized (mutating
+    content under the author's cursor); the viewer is the security boundary. Still prefer `react-ver` (CKEditor 5) when
+    the licence is not decisive. **`react-ver` has no equivalent sanitization yet — port `sanitizeHtml.ts` there.**
 -   CKEditor 4 is a **global singleton** (`window.CKEDITOR`) — only one `ckeditor.js` per page. Fine for one widget; a
     second widget needing a different CKEditor build would conflict.
 -   `versionCheck` is set to `false` both **globally** (`CKEDITOR.config.versionCheck` in `loadCKEditor`, right after
@@ -289,6 +300,14 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 >     사용 가능. 그래서 `rich-text` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
 > -   대가: CKEditor 4 오픈소스는 **2023년 6월 EOL** — 보안 패치 없음. 라이선스가 결정적이지 않다면 `react-ver`
 >     (CKEditor 5) 권장.
+> -   **보안(뷰어 sanitize)**: 에디터가 `allowedContent: true`(ACF off)라 붙여넣기·임포트·마이크로플로우로 들어온
+>     마크업이 그대로 저장됨. **뷰어가 렌더 직전 DOMPurify로 sanitize** (`shared/src/sanitizeHtml.ts` —
+>     `migrateStoredValue` 이후). `<script>`·이벤트 핸들러·`javascript:` URL·`<style>`·인라인 `<svg>`/MathML·
+>     `<iframe>` 제거, `<img>`의 `data:image/svg+xml` 제거(래스터 base64는 유지), `target="_blank"`에
+>     `rel="noopener noreferrer"` 추가. 마이크로플로우 링크·표·폰트/색상·코드 블록·폼 등 에디터가 정상적으로
+>     만드는 마크업은 보존. 뷰어 속성 **`Sanitize HTML`**(*Security* 그룹, 기본 켜짐)으로 완전 신뢰 콘텐츠는
+>     끌 수 있으나, 토글보다 `BASE_CONFIG`를 넓히는 게 우선. 편집기 저장 경로는 sanitize 안 함(작성 중 커서
+>     훼손). `react-ver`에는 아직 없음 — 그쪽으로도 포팅 필요.
 > -   CKEditor 4.22.0을 위젯의 `assets/ckeditor/`에 **번들** (빌드 시 `ckeditor4` + `ckeditor-wordcount-plugin` dev
 >     의존성에서 복사, `rollup.config.mjs`). 소비자는 `.mpk`만 `widgets/`에 넣으면 됨 — 오프라인 OK, CDN 불필요.
 >     `.mpk` ~65KB → ~2.7MB. "Editor script URL" 속성은 읽기 전용(빈값 = 번들 사본 사용).

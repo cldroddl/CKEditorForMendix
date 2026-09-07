@@ -40,6 +40,12 @@
                 <description>Cut of text after a certain height. Set this to a number of pixels.</description>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Security">
+            <property key="sanitizeContent" type="boolean" defaultValue="true">
+                <caption>Sanitize HTML</caption>
+                <description>Remove unsafe markup (scripts, event handlers, javascript: URLs, iframes, style blocks, inline SVG) from the stored content before rendering it. Leave this on. Turn it off only when the content is fully trusted (produced solely by your own app, never by end users or imports) and you need markup the sanitizer strips.</description>
+            </property>
+        </propertyGroup>
         <propertyGroup caption="Common">
             <systemProperty key="Name" />
             <systemProperty key="Visibility" />

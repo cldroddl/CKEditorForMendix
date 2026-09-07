@@ -1,14 +1,21 @@
 import { ReactElement, useMemo } from "react";
 import { ValueStatus } from "mendix";
-import { MicroflowLinkBinding, RichTextView, migrateStoredValue } from "@ckeditorformendix/shared";
+import { MicroflowLinkBinding, RichTextView, migrateStoredValue, sanitizeRichText } from "@ckeditorformendix/shared";
 import { RichTextViewerContainerProps } from "../typings/RichTextViewerProps";
 
 import "./ui/RichTextViewer.css";
 
 export function RichTextViewer(props: RichTextViewerContainerProps): ReactElement | null {
-    const { messageString, microflowLinks, cutOffRules, class: className } = props;
+    const { messageString, microflowLinks, cutOffRules, sanitizeContent, class: className } = props;
 
-    const html = useMemo(() => migrateStoredValue(messageString.value ?? ""), [messageString.value]);
+    // Migrate legacy microflow-link anchors first (needs the inline onclick that
+    // DOMPurify would strip), THEN sanitize. `sanitizeContent` defaults to true;
+    // turning it off exposes stored <script>/handlers/javascript: URLs — only for
+    // content the app fully trusts (see the widget XML and MIGRATION.md).
+    const html = useMemo(() => {
+        const migrated = migrateStoredValue(messageString.value ?? "");
+        return sanitizeContent ? sanitizeRichText(migrated) : migrated;
+    }, [messageString.value, sanitizeContent]);
 
     const links = useMemo<MicroflowLinkBinding[]>(
         () =>

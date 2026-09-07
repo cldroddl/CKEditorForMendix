@@ -31,7 +31,8 @@
     },
     "dependencies": {
         "@ckeditorformendix/shared": "3.0.0",
-        "classnames": "^2.5.1"
+        "classnames": "^2.5.1",
+        "dompurify": "^3.2.4"
     },
     "devDependencies": {
         "@mendix/pluggable-widgets-tools": ">=11.6.0 <11.13.0"

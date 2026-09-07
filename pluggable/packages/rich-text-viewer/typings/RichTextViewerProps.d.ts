@@ -24,6 +24,7 @@ export interface RichTextViewerContainerProps {
     messageString: EditableValue<string>;
     microflowLinks: MicroflowLinksType[];
     cutOffRules: number;
+    sanitizeContent: boolean;
 }
 
 export interface RichTextViewerPreviewProps {
@@ -40,4 +41,5 @@ export interface RichTextViewerPreviewProps {
     messageString: string;
     microflowLinks: MicroflowLinksPreviewType[];
     cutOffRules: number | null;
+    sanitizeContent: boolean;
 }

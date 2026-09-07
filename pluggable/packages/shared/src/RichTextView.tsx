@@ -10,7 +10,11 @@ export interface MicroflowLinkBinding {
 }
 
 export interface RichTextViewProps {
-    /** Stored HTML from the attribute. Assumed already migrated to the new format. */
+    /**
+     * Stored HTML from the attribute. The caller is responsible for running
+     * `migrateStoredValue` and (for untrusted content) `sanitizeRichText` first —
+     * this component renders the string as-is via `dangerouslySetInnerHTML`.
+     */
     html: string;
     /** Bindings resolved from the widget's `microflowLinks` list. */
     links: MicroflowLinkBinding[];
@@ -22,8 +26,8 @@ export interface RichTextViewProps {
 }
 
 /**
- * Renders trusted rich-text HTML (produced by our own editor) and re-attaches
- * microflow-link click behaviour without any inline JS.
+ * Renders rich-text HTML (already migrated / sanitized by the caller) and
+ * re-attaches microflow-link click behaviour without any inline JS.
  */
 export function RichTextView({
     html,
@@ -79,8 +83,7 @@ export function RichTextView({
             ref={containerRef}
             className={className}
             style={style}
-            // Content originates from our own editor / the app's own data; Mendix
-            // treats stored HTML attributes as trusted, same as the legacy widget.
+            // `html` is sanitized upstream (RichTextViewer -> sanitizeRichText).
             dangerouslySetInnerHTML={{ __html: html }}
         />
     );

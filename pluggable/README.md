@@ -126,6 +126,15 @@ Do **not** reuse the legacy `../test/Test.mpr` — it is a Mendix 7 project, inc
 Phase 1 (scaffold + green build) and the core of phase 2 (microflow links) are in place. Not yet ported: code snippet /
 character count (need a "full" CKEditor build), image handling, self-hosted asset bundling. See `MIGRATION.md`.
 
+## Security — viewer HTML sanitization
+
+CKEditor 4 is EOL and the editor runs with content filtering off, so the **viewer sanitizes stored HTML with
+[DOMPurify](https://github.com/cure53/DOMPurify)** (Apache-2.0) before rendering it: scripts, event handlers,
+`javascript:` URLs, `<style>` blocks, inline SVG/MathML and `<iframe>` are stripped; microflow links, images, tables,
+formatting and code blocks are kept. The **Rich Text Viewer → Sanitize HTML** property (default **on**) disables it
+for content the app fully trusts and that needs stripped markup — leave it on unless you have a specific reason. The
+editor itself is not sanitized on save. See `MIGRATION.md` → "Known constraints / decisions" → Security.
+
 ## Licensing note
 
 CKEditor **4.22.0** is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1 (confirmed in `node_modules/ckeditor4/package.json`).
@@ -256,6 +265,15 @@ mxcli -p tests/testProject/testProject.mpr exec tests/testProject/mdlsource/setu
 
 Phase 1(스캐폴드 + 빌드 성공)과 Phase 2(microflow 링크)의 핵심이 완료되었습니다.
 미이식: 코드 스니펫 / 글자 수 세기("full" CKEditor 빌드 필요), 이미지 처리, 자체 호스팅 에셋 번들링. `MIGRATION.md` 참고.
+
+## 보안 — 뷰어 HTML sanitize
+
+CKEditor 4는 EOL이고 에디터는 콘텐츠 필터링을 끈 채로 동작하므로, **뷰어가 렌더 전에 저장 HTML을
+[DOMPurify](https://github.com/cure53/DOMPurify)**(Apache-2.0)로 정화합니다: `<script>`·이벤트 핸들러·
+`javascript:` URL·`<style>`·인라인 SVG/MathML·`<iframe>` 제거, microflow 링크·이미지·표·서식·코드 블록은 유지.
+**Rich Text Viewer → Sanitize HTML** 속성(기본 켜짐)으로 완전 신뢰 + 정화기가 벗기는 마크업이 필요한 앱은 끌 수
+있으나, 특별한 이유가 없으면 켜 두세요. 에디터 저장 시점은 정화하지 않습니다. `MIGRATION.md` → "Known constraints /
+decisions" → Security 참고.
 
 ## 라이선스 노트
 
