@@ -116,6 +116,12 @@ Two pluggable widgets ship from one package (`CKEditorForMendix` client module):
     - Renders stored HTML, rehydrates `a.mx-microflow-link` placeholders, wires click → `mfName` action, always
       highlights `pre code`, clips to `cutOffRules` pixels
 
+Each package has a **hand-written `src/package.xml`** (pwt copies it verbatim). Its `<files>` entry must be the
+runtime **directory** (`<file path="ckeditorformendix/richtext/" />`), not a single `RichText.js` — the directory form
+is what registers `RichText.mjs`/`.css`/`assets/` too. With only `RichText.js` listed, the Dojo client still works
+(it loads the AMD file) but the **React client** cannot find the ES module and Studio Pro reports
+_"…please check if they … are ES6 modules"_ on build.
+
 ## The microflow-link mechanism (must stay wire-compatible with existing stored data)
 
 The old widget stores links as:

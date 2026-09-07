@@ -5,7 +5,7 @@
             <widgetFile path="RichTextViewer.xml" />
         </widgetFiles>
         <files>
-            <file path="ckeditorformendix/richtextviewer/RichTextViewer.js" />
+            <file path="ckeditorformendix/richtextviewer/" />
         </files>
     </clientModule>
 </package>

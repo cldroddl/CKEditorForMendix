@@ -5,7 +5,7 @@
             <widgetFile path="RichText.xml" />
         </widgetFiles>
         <files>
-            <file path="ckeditorformendix/richtext/RichText.js" />
+            <file path="ckeditorformendix/richtext/" />
         </files>
     </clientModule>
 </package>
