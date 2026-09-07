@@ -246,3 +246,5 @@ tests/
 `CKEditorForMendix.js`(에디터), `CKEditorViewerForMendix.js`(뷰어). ES5 + AMD `define([...])` + Dojo `declare` 패턴이고, `lib/` 아래 CKEditor 4.10.0 · jQuery · 플러그인은 전부 서드파티라 손대지 않습니다. 빌드는 `Gulpfile.js`(Gulp 3)가 `src/`를 zip으로 묶는 게 전부입니다.
 
 재작성(`pluggable/`)의 목표는 이 위젯의 **설정 인터페이스(속성 키·캡션·그룹·기본값)를 그대로 유지**하면서 내부를 React + TypeScript로 바꾸는 것입니다. 세부 매핑과 의도적으로 뺀 기능(oembed 등)은 `pluggable/MIGRATION.md`에 정리돼 있습니다.
+
+> **주의**: 새 위젯은 레거시 위젯의 **교체품**입니다. CKEditor 4는 페이지당 `window.CKEDITOR` 하나뿐이라, 한 앱에 레거시 Dojo 위젯과 새 pluggable 위젯을 **같이 넣으면 안 됩니다** (레거시가 먼저 CKEditor 4.10을 올려서 새 위젯이 플러그인 404로 깨짐). 새 위젯을 넣기 전에 레거시 위젯을 앱에서 완전히 제거하세요 — 절차는 `README.md`의 "레거시 위젯을 대체함" 절 참고.

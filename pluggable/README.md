@@ -13,6 +13,25 @@ read-only. The bundled files carry a fixed timestamp so a rebuilt `.mpk` is byte
 Studio Pro skips re-extracting them on redeploy — which is what would otherwise fail on Windows against the open
 `editor.css` (see `MIGRATION.md` phase 6).
 
+### Replaces the legacy widget — do not run both
+
+This widget is the successor to the legacy Dojo **CKEditor for Mendix** (`CKEditorForMendix` /
+`CKEditorViewerForMendix`, Marketplace app 1715). CKEditor 4 is a hard `window.CKEDITOR` page singleton: if the
+legacy widget is anywhere in the app it loads its own CKEditor **4.10** first, and this widget silently reuses that
+stale core — you get `404`s for plugins the 4.10 build lacks (`autogrow`, `copyformatting`, …) and a broken toolbar.
+
+Before adding this widget, remove the legacy one completely:
+
+1. Delete every **CKEditor for Mendix (Editor)** / **(Viewer)** widget instance from your pages (Studio Pro will list
+   them under _Unused items_ once removed, or use _Find usages_ on the widget).
+2. Delete the legacy widget package: `widgets/CKEditorForMendix.mpk` (and the extracted
+   `deployment/web/widgets/CKEditorForMendix/` folder if it lingers).
+3. _Project → Update all widgets_, then _Clean deployment directory_ (right-click the app in Studio Pro) so the old
+   `widget/lib/` assets are gone.
+4. Run the app and hard-refresh the browser (the legacy CKEditor may be cached).
+
+The new widgets appear in the toolbox as **Rich Text (CKEditor)** and **Rich Text Viewer (CKEditor)**.
+
 ## Layout (npm workspaces)
 
 | Package                     | What                                                                                                                                                             |
@@ -129,6 +148,25 @@ CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~2.7MB) — `.mpk`�
 위젯이 자기 `assets/ckeditor/`에서 로드하고 **"Editor script URL"** 속성은 읽기 전용입니다.
 번들 파일은 고정 타임스탬프를 가져서, 다시 빌드해도 `.mpk`의 CKEditor 부분이 바이트 동일 → Studio Pro가 재추출을 스킵
 → Windows에서 열린 `editor.css` 잠금을 회피 (`MIGRATION.md` phase 6 참고).
+
+### 레거시 위젯을 대체함 — 둘을 같이 쓰면 안 됨
+
+이 위젯은 레거시 Dojo **CKEditor for Mendix**(`CKEditorForMendix` / `CKEditorViewerForMendix`, 마켓플레이스 앱 1715)의
+후속입니다. CKEditor 4는 페이지당 `window.CKEDITOR` 하나뿐인 하드 싱글톤이라, 레거시 위젯이 앱 어딘가에 있으면 그게
+먼저 자기 CKEditor **4.10**을 로드하고, 이 위젯은 그 낡은 코어를 조용히 재사용합니다 — 4.10 빌드에 없는 플러그인
+(`autogrow`, `copyformatting`, …)에 대해 `404`가 나고 툴바가 깨집니다.
+
+이 위젯을 추가하기 전에 레거시 위젯을 완전히 제거하세요:
+
+1. 모든 페이지에서 **CKEditor for Mendix (Editor)** / **(Viewer)** 위젯 인스턴스를 삭제 (제거 후 Studio Pro의
+   _Unused items_ 에 표시되며, 위젯에 _Find usages_ 로 사용처 확인 가능).
+2. 레거시 위젯 패키지 삭제: `widgets/CKEditorForMendix.mpk` (그리고 남아 있으면 추출된
+   `deployment/web/widgets/CKEditorForMendix/` 폴더도).
+3. _Project → Update all widgets_ 후, Studio Pro에서 앱 우클릭 → _Clean deployment directory_ 로 옛 `widget/lib/`
+   자산을 제거.
+4. 앱 실행 후 브라우저 강력 새로고침 (레거시 CKEditor가 캐시돼 있을 수 있음).
+
+새 위젯은 툴박스에 **Rich Text (CKEditor)** / **Rich Text Viewer (CKEditor)** 로 나타납니다.
 
 ## 구성 (npm workspaces)
 

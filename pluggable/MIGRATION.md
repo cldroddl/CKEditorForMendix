@@ -76,6 +76,26 @@ The `mendixlink` dialog is registered with the editor CKEditor passes at open ti
 `dialog.add("mendixLinkDialog", dialogEditor => buildDialog(dialogEditor))`), so each editor's "Insert Mendix link"
 dialog reads its own configured link list even with several editors on the page.
 
+### Cannot coexist with the legacy Dojo widget
+
+The same singleton constraint means this widget **cannot run alongside the legacy `CKEditorForMendix` /
+`CKEditorViewerForMendix` Dojo widget** (Marketplace app 1715). The legacy widget vendors CKEditor **4.10** under
+`widgets/CKEditorForMendix/widget/lib/` and, being a Dojo widget, bootstraps before any pluggable widget — so it wins
+the `window.CKEDITOR` race and sets `CKEDITOR.basePath` to its own `lib/`. `loadCKEditor()` then sees `window.CKEDITOR`
+already present and reuses it (`loadCKEditor.ts` early return). The 4.10 build lacks most of `BASE_EXTRA_PLUGINS`, so
+`CKEDITOR.replace(host, { extraPlugins: … })` lazy-loads them from the legacy basePath and 404s:
+
+```
+GET /widgets/CKEditorForMendix/widget/lib/plugins/autogrow/plugin.js       404
+GET /widgets/CKEditorForMendix/widget/lib/plugins/copyformatting/plugin.js 404
+```
+
+**Fix: remove the legacy widget from the app entirely** (this widget is its replacement, not a companion) — see the
+"Replaces the legacy widget" section in `README.md` for the removal steps.
+
+A code-side guard (detect a foreign `window.CKEDITOR`, refuse to reuse it, fall back to the raw-HTML `<textarea>` with
+a clear message instead of 404 spam) is a planned follow-up, not yet implemented.
+
 ## Widgets
 
 Two pluggable widgets ship from one package (`CKEditorForMendix` client module):
@@ -272,6 +292,13 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 >     신 수동 `useEffect` 래퍼로 스크립트 주입 + `CKEDITOR.replace` + StrictMode 안전한 정리.
 > -   `mendixlink` / `pastebase64` 플러그인은 구 Dojo 위젯 소스를 TS로 인라인 포팅 (`mendixlink`는 신규 `data-mf` wire
 >     형식).
+> -   **레거시 Dojo 위젯(`CKEditorForMendix` / `CKEditorViewerForMendix`, 마켓플레이스 앱 1715)과 한 앱에 공존
+>     불가.** CKEditor 4는 페이지당 `window.CKEDITOR` 하나뿐인 싱글톤인데, 레거시 위젯은 Dojo라 pluggable 위젯보다
+>     먼저 부팅되어 자기 CKEditor **4.10**(`widgets/CKEditorForMendix/widget/lib/`)을 올리고 `basePath`를 선점함.
+>     그러면 `loadCKEditor()`가 그 낡은 코어를 재사용 → 4.10에 없는 `BASE_EXTRA_PLUGINS`를 레거시 경로에서
+>     lazy-load 시도 → `plugins/autogrow/plugin.js` 등 `404`, 툴바 깨짐. **해결: 레거시 위젯을 앱에서 완전히 제거**
+>     (이 위젯이 레거시의 교체품이지 병행 대상이 아님) — 제거 절차는 `README.md`의 "레거시 위젯을 대체함" 절 참고.
+>     코드 측 가드(외부 `window.CKEDITOR` 감지 시 재사용 거부 + `<textarea>` fallback)는 예정된 후속 작업.
 >
 > **위젯 XML은 레거시 인터페이스를 그대로 재현합니다** — `src/CKEditorForMendix/CKEditorForMendix.xml` /
 > `CKEditorViewerForMendix.xml`의 property key·caption·기본값·enum·순서·그룹 동일. `<category>`는 pluggable에서
