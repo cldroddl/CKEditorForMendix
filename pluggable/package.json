@@ -18,6 +18,13 @@
         "dev:viewer": "npm run start --workspace @ckeditorformendix/rich-text-viewer",
         "release": "npm run release --workspaces --if-present",
         "lint": "npm run lint --workspaces --if-present",
-        "test": "npm run test --workspaces --if-present"
+        "test": "npm run test --workspaces --if-present",
+        "test:ct": "playwright test --config playwright-ct.config.ts",
+        "test:e2e": "playwright test --config playwright.config.ts",
+        "pretest:ct": "npm run build"
+    },
+    "devDependencies": {
+        "@playwright/experimental-ct-react": "^1.62.1",
+        "@playwright/test": "^1.62.1"
     }
 }

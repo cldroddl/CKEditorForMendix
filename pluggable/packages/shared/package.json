@@ -24,10 +24,15 @@
         "dompurify": "^3.2.4"
     },
     "devDependencies": {
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.1.0",
         "@types/jest": "^29.5.12",
+        "@types/react": "^19.0.0",
         "cross-env": "^7.0.3",
         "jest": "^29.7.0",
         "jest-environment-jsdom": "^29.7.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
         "ts-jest": "^29.2.5",
         "typescript": "^5.6.3"
     }

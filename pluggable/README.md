@@ -47,12 +47,19 @@ Run from `pluggable/`:
 ```bash
 npm install
 npm run build            # build shared, then both widget .mpk files
-npm test                 # shared unit tests
+npm test                 # shared unit tests (jest + jsdom)
+npm run test:ct          # component tests (Playwright + real Chromium) — needs `npx playwright install chromium`
+npm run test:e2e         # end-to-end tests against a running Mendix app — see tests/e2e/README.md
 npm run lint             # prettier + eslint across packages
 
 npm run dev:editor       # pluggable-widgets-tools dev server for the editor widget
 npm run dev:viewer       # …for the viewer widget
 ```
+
+Three test layers: **`npm test`** — pure logic in `packages/shared` (`microflowLinks`, `imageUrls`, `sanitizeHtml`,
+`RichTextView` DOM wiring). **`npm run test:ct`** — mounts `<Editor>` / `<RichTextView>` in Chromium; the editor tests
+load the real CKEditor 4 runtime (jsdom can't), so `pretest:ct` runs a build first. **`npm run test:e2e`** — drives a
+real Mendix app (microflow execution, attribute round-trip); not in CI, needs the runtime.
 
 `shared` must be built before the widgets (its `dist/` is what the widget bundlers consume). `npm run build` /
 `npm install` (via its `prepare` script) both do this.
@@ -190,7 +197,9 @@ CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~2.7MB) — `.mpk`�
 ```bash
 npm install
 npm run build            # shared 빌드 후 두 위젯 .mpk 생성
-npm test                 # shared 유닛 테스트
+npm test                 # shared 유닛 테스트 (jest + jsdom)
+npm run test:ct          # 컴포넌트 테스트 (Playwright + 실제 크로미움) — `npx playwright install chromium` 필요
+npm run test:e2e         # 실행 중인 Mendix 앱 대상 E2E — tests/e2e/README.md 참고
 npm run lint             # prettier + eslint (전체 패키지)
 
 npm run dev:editor       # 에디터 위젯 개발 서버 (pluggable-widgets-tools)
@@ -200,6 +209,11 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
 `shared`는 위젯보다 먼저 빌드되어야 합니다 (위젯 번들러가 `dist/`를 소비).
 `npm run build` / `npm install`(`prepare` 스크립트)이 이를 처리합니다.
 위젯 `.mpk` 출력물은 `packages/<widget>/dist/<version>/`에 생성됩니다.
+
+**테스트 3계층**: `npm test` — `packages/shared`의 순수 로직(`microflowLinks`·`imageUrls`·`sanitizeHtml`·
+`RichTextView` DOM 배선). `npm run test:ct` — `<Editor>`/`<RichTextView>`를 크로미움에 마운트, 에디터
+테스트는 실제 CKEditor 4 런타임을 로드(jsdom 불가)하므로 `pretest:ct`가 빌드를 먼저 실행. `npm run test:e2e` —
+실제 Mendix 앱 구동(마이크로플로우 실행, 속성 왕복); CI 미포함, 런타임 필요.
 
 ### Mendix 앱에서 테스트하기
 

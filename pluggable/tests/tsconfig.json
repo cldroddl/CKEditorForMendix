@@ -1,0 +1,12 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "types": ["node"],
+        "jsx": "react-jsx",
+        "moduleResolution": "bundler",
+        "noUnusedLocals": false,
+        "noUnusedParameters": false
+    },
+    "include": ["ct/**/*", "e2e/**/*"]
+}

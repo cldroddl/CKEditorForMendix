@@ -260,6 +260,22 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 -   `.eslintrc.js` must use `require.resolve(...)` for the pwt base config (npm-workspaces resolution).
 -   CKEditor 4's `ckeditor.js` is a self-loading IIFE — it must be an external `<script>`, never Rollup-bundled.
 
+### Tests
+
+-   **`npm test`** — jest + jsdom in `packages/shared` (`microflowLinks`, `imageUrls`, `sanitizeHtml`, and
+    `RichTextView` DOM wiring via `@testing-library/react`). This is the CI layer.
+-   **`npm run test:ct`** — Playwright Component Testing (`playwright-ct.config.ts`, specs in `tests/ct/*.ct.tsx`).
+    Mounts `<RichTextView>` and `<Editor>` in real Chromium. The `<Editor>` specs load the real CKEditor 4 runtime
+    from `packages/rich-text/dist/tmp/widgets/…/assets/ckeditor` served as Vite `publicDir` — so `pretest:ct` runs a
+    build and the specs `test.skip` if the assets are missing. Covers the `BASE_EXTRA_PLUGINS` set, the load-failure
+    `<textarea>` fallback, and `onChange` emission — things jsdom can't do (CKEditor needs `execCommand`/Range).
+-   **`npm run test:e2e`** — Playwright against a running Mendix app (`playwright.config.ts`, `tests/e2e/`). Not in CI;
+    needs the runtime + hand-wired microflow links (`tests/e2e/README.md`). Covers microflow execution and the
+    editor↔viewer attribute round-trip.
+-   Playwright browsers install outside the repo (`~/…/ms-playwright`); `npx playwright install chromium` once.
+    `tests/ct` / `tests/e2e` source is committed (re-included past the `/tests/*` ignore); `playwright/.cache`,
+    `test-results`, `playwright-report` are ignored.
+
 ## Known constraints / decisions
 
 -   **Licence (the reason this branch exists)**: CKEditor **4.22.0** is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1
