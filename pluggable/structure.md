@@ -195,7 +195,7 @@ packages/<widget>/dist/<version>/
 ```
 
 -   **위젯 하나당 `.mpk` 하나.** 레거시는 한 `.mpk`에 에디터+뷰어를 같이 담았지만, pwt는 npm 패키지 = `.mpk` 1:1이라 파일이 두 개입니다. 앱에는 둘 다 임포트합니다.
--   에디터 `.mpk`는 번들된 CKEditor 때문에 ~2.7MB (뷰어는 ~26KB). CKEditor는 git에 없고 빌드 시 dev 의존성에서 복사됨 (고정 타임스탬프).
+-   에디터 `.mpk`는 번들된 CKEditor 때문에 ~1.1MB (뷰어는 ~32KB). CKEditor는 git에 없고 빌드 시 dev 의존성에서 복사됨 (고정 타임스탬프, 로케일은 `en`/`ko`만).
 -   `RichText.js`(AMD) / `RichText.mjs`(ESM) **이중 출력**은 pwt가 자동으로 만듭니다. 소스가 아니라 빌드 결과물입니다.
 -   `typings/RichTextProps.d.ts`는 `RichText.xml`에서 **자동 생성**되는 타입. `RichText.tsx`가 이걸 `props` 타입으로 씁니다. XML을 고치면 타입도 바뀝니다.
 

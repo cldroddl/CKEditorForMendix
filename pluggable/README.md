@@ -7,11 +7,13 @@ Why: CKEditor 4.22.0 is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1, so it can be 
 licence key — unlike CKEditor 5 (GPL + mandatory key). Trade-off: CKEditor 4 open source is EOL since June 2023 (no
 security patches). See [`MIGRATION.md`](./MIGRATION.md) for the full rationale, property mapping, and wire format.
 
-A CKEditor 4.22.0 runtime is **bundled into the `.mpk`** (~2.7 MB) at build time — drop the `.mpk` in `widgets/` and
-it works, offline, no CDN. The widget loads it from its own `assets/ckeditor/`; the **Editor script URL** property is
-read-only. The bundled files carry a fixed timestamp so a rebuilt `.mpk` is byte-identical in its CKEditor part and
-Studio Pro skips re-extracting them on redeploy — which is what would otherwise fail on Windows against the open
-`editor.css` (see `MIGRATION.md` phase 6).
+A CKEditor 4.22.0 runtime is **bundled into the `.mpk`** (~1.1 MB, `en`/`ko` locales only — CKEditor falls back to
+`en`) at build time — drop the `.mpk` in `widgets/` and it works, offline, no CDN. The widget loads it from its own
+`assets/ckeditor/`; the **Editor script URL** property is read-only. The bundled files carry a fixed timestamp so a
+rebuilt `.mpk` is byte-identical in its CKEditor part and Studio Pro skips re-extracting them on redeploy — which is
+what would otherwise fail on Windows against an open asset handle. First deploy / a "Clean deployment" still needs the
+app stopped and its browser tabs closed (see `MIGRATION.md` phase 6). To bundle another locale, add its code to
+`KEEP_LANGS` in `packages/rich-text/rollup.config.mjs`.
 
 ### Replaces the legacy widget — do not run both
 
@@ -160,8 +162,10 @@ shared 패키지·뷰어 위젯·워크스페이스·빌드 도구는 동일하�
 대가: CKEditor 4 오픈소스는 2023년 6월 EOL(보안 패치 없음).
 전체 근거·속성 매핑·wire 형식은 [`MIGRATION.md`](./MIGRATION.md) 참고.
 
-CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~2.7MB) — `.mpk`만 `widgets/`에 넣으면 동작, 오프라인 OK, CDN 불필요.
+CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~1.1MB, `en`/`ko` 로케일만 — CKEditor는 없는 로케일을 `en`으로 폴백)
+— `.mpk`만 `widgets/`에 넣으면 동작, 오프라인 OK, CDN 불필요.
 위젯이 자기 `assets/ckeditor/`에서 로드하고 **"Editor script URL"** 속성은 읽기 전용입니다.
+다른 로케일이 필요하면 `packages/rich-text/rollup.config.mjs`의 `KEEP_LANGS`에 코드 추가.
 번들 파일은 고정 타임스탬프를 가져서, 다시 빌드해도 `.mpk`의 CKEditor 부분이 바이트 동일 → Studio Pro가 재추출을 스킵
 → Windows에서 열린 `editor.css` 잠금을 회피 (`MIGRATION.md` phase 6 참고).
 

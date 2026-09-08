@@ -40,7 +40,8 @@ const assetsCKEditorDir = join(packageRoot, "dist/tmp/widgets/ckeditorformendix/
 
 const FROZEN_MTIME = new Date("2023-06-28T00:00:00Z"); // CKEditor 4.22.0 release; bump with the version
 
-// Only the files CKEditor needs at runtime — no samples/, no dev tooling, one skin.
+// Only the files CKEditor needs at runtime — no samples/, no dev tooling, one skin,
+// and locale files trimmed to KEEP_LANGS (see includeInBundle).
 const CKEDITOR_RUNTIME_ENTRIES = [
     "ckeditor.js",
     "config.js",
@@ -53,7 +54,25 @@ const CKEDITOR_RUNTIME_ENTRIES = [
     "vendor"
 ];
 
-const skipDevDirs = src => !/[/\\](samples|dev|tests|\.github)([/\\]|$)/.test(src);
+/**
+ * CKEditor locale files to keep. CKEditor 4 ships a `lang/<xx>.js` for the core
+ * plus one per plugin and per dialog (~2200 files, ~70 languages) and falls back
+ * to `en` for any locale it can't load, so we bundle only the languages this
+ * widget is deployed in. A widget dev deploying in another language adds its
+ * ISO-639-1 code here and rebuilds. Matches any `lang/xx.js` / `lang/xx-yy.js`
+ * in the tree (core lang, per-plugin lang, per-dialog lang, bundled wordcount);
+ * non-JS locale assets such as the emoji `lang` JSON are left untouched.
+ */
+const KEEP_LANGS = new Set(["en", "ko"]);
+const LANG_FILE_RE = /[/\\]lang[/\\]([a-z]{2}(?:-[a-z]+)?)\.js$/;
+
+const includeInBundle = src => {
+    if (/[/\\](samples|dev|tests|\.github)([/\\]|$)/.test(src)) {
+        return false;
+    }
+    const lang = LANG_FILE_RE.exec(src);
+    return !lang || KEEP_LANGS.has(lang[1]);
+};
 
 const LOCK_ERRORS = new Set(["EBUSY", "EPERM", "ENOTEMPTY", "EACCES"]);
 
@@ -74,7 +93,7 @@ function retryOnLock(fn, attempts = 6, delayMs = 200) {
 }
 
 function copyEntry(from, to) {
-    retryOnLock(() => cpSync(from, to, { recursive: true, filter: skipDevDirs }));
+    retryOnLock(() => cpSync(from, to, { recursive: true, filter: includeInBundle }));
 }
 
 function freezeTimestamps(dir) {

@@ -235,18 +235,22 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 6. ✅ **CKEditor bundled in the `.mpk`.** `packages/rich-text/rollup.config.mjs` (a custom config pwt merges over its
    own) copies a CKEditor 4.22.0 runtime into the widget's `assets/ckeditor/` at build time — from dev deps
    `ckeditor4@4.22.0` (standard-all distribution) + `ckeditor-wordcount-plugin` (MIT), `moono-lisa` skin only, no
-   samples. `.mpk` ~65 KB → ~2.7 MB. The consumer drops the `.mpk` in `widgets/` and it works — offline, no CDN.
+   samples, and locale files trimmed to `KEEP_LANGS` (`en`, `ko` — CKEditor falls back to `en` for any missing locale;
+   ~2200 unused `lang/*.js` dropped). `.mpk` ~65 KB → **~1.1 MB** (~750 asset files). The consumer drops the `.mpk` in
+   `widgets/` and it works — offline, no CDN.
 
     **The Windows deploy lock and how it's solved.** Studio Pro re-extracts a widget `.mpk` into `deployment/` on each
     `Run`, incrementally — files whose timestamp+size already match on disk are skipped. On Windows, Jetty / the browser
-    holds an open handle on served static CSS (`editor.css`) and the OS won't let it be overwritten. A first bundling
-    attempt copied the CKEditor tree with `fs.cpSync` (current mtime on every build) → Studio Pro saw ~3000 "changed"
-    files every deploy → tried to overwrite the locked `editor.css` → `Run` failed. The legacy Dojo widget never hit
-    this because its vendored `.mpk` is a frozen committed artifact — stable timestamps, so the incremental extract
-    skips it. The fix: `bundle-ckeditor` stamps every copied file with a **fixed mtime** (`FROZEN_MTIME`, bump it with
-    the CKEditor version), so a rebuilt `.mpk` is byte-identical in its CKEditor part and Studio Pro skips re-extracting
-    it — exactly like legacy. A `.mpk` a consumer never rebuilds is frozen anyway; the freeze also protects the widget
-    developer's own rebuild-and-Run loop. First deploy and any CKEditor-version bump still need the app stopped.
+    holds an open handle on served static assets (`editor.css`, skin PNGs, plugin icons) and the OS won't let them be
+    overwritten. A first bundling attempt copied the CKEditor tree with `fs.cpSync` (current mtime on every build) →
+    Studio Pro saw every file "changed" every deploy → tried to overwrite a locked one → `Run` failed. The legacy Dojo
+    widget never hit this because its vendored `.mpk` is a frozen committed artifact — stable timestamps, so the
+    incremental extract skips it. The fix: `bundle-ckeditor` stamps every copied file with a **fixed mtime**
+    (`FROZEN_MTIME`, bump it with the CKEditor version), so a rebuilt `.mpk` is byte-identical in its CKEditor part and
+    Studio Pro skips re-extracting it — exactly like legacy. A `.mpk` a consumer never rebuilds is frozen anyway; the
+    freeze also protects the widget developer's own rebuild-and-Run loop. **First deploy, a CKEditor-version bump, or a
+    "Clean deployment directory" still need the app stopped + all browser tabs on it closed** — otherwise Studio Pro
+    trips on the first locked asset it re-extracts (`… is being used by another process`).
 
     The `versionCheck` global fix (item below) also came from this work.
 
@@ -263,10 +267,11 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 -   `.eslintrc.js` must use `require.resolve(...)` for the pwt base config (npm-workspaces resolution).
 -   CKEditor 4's `ckeditor.js` is a self-loading IIFE — it must be an external `<script>`, never Rollup-bundled.
 -   `packages/rich-text/rollup.config.mjs` `bundle-ckeditor`: pwt instantiates the plugin once per output config
-    (`.js` / `.mjs` / `editorPreview` / `editorConfig`), so the ~2952-file copy is guarded by a **module-scope** flag
-    to run once per build, not 4×. The delete / copy / `utimes` calls retry on `EBUSY`/`EPERM` — Windows Defender and
-    the Search indexer briefly lock freshly-written files, which otherwise failed the build mid-run (`EBUSY:
-    resource busy or locked, unlink … plugins/save/lang/uk.js`).
+    (`.js` / `.mjs` / `editorPreview` / `editorConfig`), so the CKEditor copy is guarded by a **module-scope** flag to
+    run once per build, not 4×. The delete / copy / `utimes` calls retry on `EBUSY`/`EPERM` — Windows Defender and the
+    Search indexer briefly lock freshly-written files, which otherwise failed the build mid-run (`EBUSY: resource busy
+    or locked, unlink …`). Locale files are trimmed to `KEEP_LANGS` in the `cpSync` filter (`includeInBundle`): ~750
+    asset files instead of ~2950, both a smaller `.mpk` and a smaller Windows-lock surface at deploy time.
 
 ### Tests
 
@@ -334,9 +339,11 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 >     훼손). `react-ver`에는 아직 없음 — 그쪽으로도 포팅 필요.
 > -   CKEditor 4.22.0을 위젯의 `assets/ckeditor/`에 **번들** (빌드 시 `ckeditor4` + `ckeditor-wordcount-plugin` dev
 >     의존성에서 복사, `rollup.config.mjs`). 소비자는 `.mpk`만 `widgets/`에 넣으면 됨 — 오프라인 OK, CDN 불필요.
->     `.mpk` ~65KB → ~2.7MB. "Editor script URL" 속성은 읽기 전용(빈값 = 번들 사본 사용).
+>     `.mpk` ~65KB → **~1.1MB** (로케일은 `KEEP_LANGS` = `en`/`ko`만, 나머지는 `en`으로 폴백; 미사용 `lang/*.js`
+>     ~2200개 제외 → 에셋 파일 ~750개). "Editor script URL" 속성은 읽기 전용(빈값 = 번들 사본 사용).
 >     번들 파일은 **고정 mtime**으로 도장 → 다시 빌드해도 `.mpk`의 CKEditor 부분이 바이트 동일 → Studio Pro가
->     재추출을 스킵 (Windows에서 실행 중인 앱이 연 `editor.css` 잠금 회피 — 레거시 위젯이 안 걸리던 것과 같은 이유).
+>     재추출을 스킵 (Windows에서 실행 중인 앱이 연 정적 파일 잠금 회피 — 레거시 위젯이 안 걸리던 것과 같은 이유).
+>     첫 배포 / "Clean deployment" 후에는 앱 정지 + 브라우저 탭 닫고 Run.
 > -   스크립트를 못 받으면(오프라인·방화벽·CSP) 경고 메시지 + 같은 속성에 바인딩된 `<textarea>`를 렌더 — 저장된 HTML을
 >     원본 소스로 계속 보고 편집할 수 있고, 스크립트가 로드되면(URL 수정 후 또는 다음 마운트 시) 서식 편집으로 복귀.
 >     레거시 위젯은 빈 박스만 나왔음.
