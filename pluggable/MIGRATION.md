@@ -259,6 +259,11 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
 -   `shared` is consumed by the widget bundlers as **compiled JS** (`dist/`), not raw TS.
 -   `.eslintrc.js` must use `require.resolve(...)` for the pwt base config (npm-workspaces resolution).
 -   CKEditor 4's `ckeditor.js` is a self-loading IIFE — it must be an external `<script>`, never Rollup-bundled.
+-   `packages/rich-text/rollup.config.mjs` `bundle-ckeditor`: pwt instantiates the plugin once per output config
+    (`.js` / `.mjs` / `editorPreview` / `editorConfig`), so the ~2952-file copy is guarded by a **module-scope** flag
+    to run once per build, not 4×. The delete / copy / `utimes` calls retry on `EBUSY`/`EPERM` — Windows Defender and
+    the Search indexer briefly lock freshly-written files, which otherwise failed the build mid-run (`EBUSY:
+    resource busy or locked, unlink … plugins/save/lang/uk.js`).
 
 ### Tests
 

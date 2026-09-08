@@ -2,10 +2,15 @@
  * Custom rollup config for the RichText widget.
  *
  * `@mendix/pluggable-widgets-tools` loads this file if present and passes its own
- * generated config array as `args.configDefaultConfig`. We prepend one plugin to
+ * generated config array as `args.configDefaultConfig`. We prepend a plugin to
  * every config that copies a CKEditor 4.22.0 runtime into the widget's
  * `assets/ckeditor/` before pwt zips the `.mpk`, so the widget is self-contained
  * (drop the `.mpk` in `widgets/` — nothing else to install) and works offline.
+ * A module-scope guard runs the copy ONCE per build, not once per output config.
+ *
+ * On Windows the delete/copy/utimes calls retry on `EBUSY`/`EPERM`: Windows
+ * Defender and the Search indexer briefly lock files right after they are
+ * written, which otherwise fails the build mid-run.
  *
  * Every copied file is stamped with a FIXED mtime. That makes a rebuilt `.mpk`
  * byte-identical to the last one, so Studio Pro's incremental deploy skips
@@ -50,44 +55,70 @@ const CKEDITOR_RUNTIME_ENTRIES = [
 
 const skipDevDirs = src => !/[/\\](samples|dev|tests|\.github)([/\\]|$)/.test(src);
 
+const LOCK_ERRORS = new Set(["EBUSY", "EPERM", "ENOTEMPTY", "EACCES"]);
+
+const sleepSync = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+
+/** Retry a filesystem call that can transiently fail on Windows while an AV / indexer holds the file. */
+function retryOnLock(fn, attempts = 6, delayMs = 200) {
+    for (let i = 1; ; i++) {
+        try {
+            return fn();
+        } catch (err) {
+            if (i >= attempts || !LOCK_ERRORS.has(err.code)) {
+                throw err;
+            }
+            sleepSync(delayMs);
+        }
+    }
+}
+
+function copyEntry(from, to) {
+    retryOnLock(() => cpSync(from, to, { recursive: true, filter: skipDevDirs }));
+}
+
 function freezeTimestamps(dir) {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const full = join(dir, entry.name);
         if (entry.isDirectory()) {
             freezeTimestamps(full);
         }
-        utimesSync(full, FROZEN_MTIME, FROZEN_MTIME);
+        retryOnLock(() => utimesSync(full, FROZEN_MTIME, FROZEN_MTIME));
     }
 }
 
+// pwt instantiates the plugin once per output config (.js, .mjs, editorPreview,
+// editorConfig). This guard is module scope, not a closure — so the copy runs
+// ONCE per build, not 4×. The repeated runs were what raced Windows Defender /
+// the search indexer scanning the freshly-written files → `EBUSY` on rm.
+let bundled = false;
+
 function bundleCKEditor() {
-    let copied = false;
     return {
         name: "bundle-ckeditor",
         writeBundle() {
-            if (copied) {
+            if (bundled) {
                 return;
             }
-            copied = true;
+            bundled = true;
 
-            rmSync(assetsCKEditorDir, { recursive: true, force: true });
+            retryOnLock(() =>
+                rmSync(assetsCKEditorDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 })
+            );
             mkdirSync(join(assetsCKEditorDir, "skins"), { recursive: true });
 
             for (const entry of CKEDITOR_RUNTIME_ENTRIES) {
                 const from = join(ckeditorRoot, entry);
                 if (existsSync(from)) {
-                    cpSync(from, join(assetsCKEditorDir, entry), { recursive: true, filter: skipDevDirs });
+                    copyEntry(from, join(assetsCKEditorDir, entry));
                 }
             }
             // wordcount is a separate MIT package; drop it next to the other plugins.
-            cpSync(wordcountPluginDir, join(assetsCKEditorDir, "plugins/wordcount"), {
-                recursive: true,
-                filter: skipDevDirs
-            });
+            copyEntry(wordcountPluginDir, join(assetsCKEditorDir, "plugins/wordcount"));
 
             if (statSync(assetsCKEditorDir).isDirectory()) {
                 freezeTimestamps(assetsCKEditorDir);
-                utimesSync(assetsCKEditorDir, FROZEN_MTIME, FROZEN_MTIME);
+                retryOnLock(() => utimesSync(assetsCKEditorDir, FROZEN_MTIME, FROZEN_MTIME));
             }
         }
     };
