@@ -34,11 +34,11 @@ export default defineConfig({
         trace: "on-first-retry",
         ctPort: 3100,
         ctViteConfig: {
-            // Serve the built CKEditor 4 runtime at /ckeditorformendix/richtext/assets/ckeditor/…
-            publicDir: resolve("packages/rich-text/dist/tmp/widgets"),
+            // Serve the built CKEditor 4 runtime at /ckeditor4formendix/ckeditorformendix/assets/ckeditor/…
+            publicDir: resolve("packages/ckeditor4-for-mendix/dist/tmp/widgets"),
             resolve: {
                 alias: {
-                    "@ckeditorformendix/shared": resolve("packages/shared/src/index.ts")
+                    "@ckeditor4formendix/shared": resolve("packages/shared/src/index.ts")
                 }
             }
         }

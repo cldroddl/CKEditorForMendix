@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget id="ckeditorformendix.richtextviewer.RichTextViewer" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
+<widget id="ckeditor4formendix.ckeditorviewerformendix.CKEditorViewerForMendix" pluginWidget="true" needsEntityContext="true" offlineCapable="true"
     supportedPlatform="Web"
     xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
-    <name>CKEditor viewer for Mendix</name>
-    <description>The CKEditor output viewer for Mendix. React rewrite.</description>
+    <name>CKEditor4 viewer for Mendix</name>
+    <description>The CKEditor4 output viewer for Mendix. React rewrite.</description>
     <icon />
     <properties>
         <propertyGroup caption="Data source">

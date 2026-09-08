@@ -1,6 +1,6 @@
 {
-    "name": "@ckeditorformendix/rich-text",
-    "widgetName": "RichText",
+    "name": "@ckeditor4formendix/editor",
+    "widgetName": "CKEditorForMendix",
     "version": "3.0.0",
     "description": "WYSIWYG rich-text editor for Mendix, built on CKEditor 4.22.0, with microflow-link support.",
     "copyright": "© Mendix Technology BV 2015-2026",
@@ -12,15 +12,15 @@
         "developmentPort": 3000
     },
     "mxpackage": {
-        "name": "RichText",
+        "name": "CKEditorForMendix",
         "type": "widget",
-        "mpkName": "ckeditorformendix.RichText.mpk"
+        "mpkName": "ckeditor4formendix.CKEditorForMendix.mpk"
     },
-    "packagePath": "ckeditorformendix",
+    "packagePath": "ckeditor4formendix",
     "marketplace": {
         "minimumMXVersion": "11.6.0",
         "appNumber": 1715,
-        "appName": "CKEditor For Mendix"
+        "appName": "CKEditor4 for Mendix"
     },
     "scripts": {
         "start": "pluggable-widgets-tools start:web",
@@ -30,7 +30,7 @@
         "release": "pluggable-widgets-tools release:web"
     },
     "dependencies": {
-        "@ckeditorformendix/shared": "3.0.0",
+        "@ckeditor4formendix/shared": "3.0.0",
         "classnames": "^2.5.1"
     },
     "devDependencies": {

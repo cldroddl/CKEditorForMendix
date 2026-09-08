@@ -1,5 +1,5 @@
 /**
- * This file was generated from RichText.xml
+ * This file was generated from CKEditorForMendix.xml
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
@@ -99,7 +99,7 @@ export interface MicroflowLinksPreviewType {
     functionNames: string;
 }
 
-export interface RichTextContainerProps {
+export interface CKEditorForMendixContainerProps {
     name: string;
     class: string;
     style?: CSSProperties;
@@ -145,7 +145,7 @@ export interface RichTextContainerProps {
     editorScriptUrl: string;
 }
 
-export interface RichTextPreviewProps {
+export interface CKEditorForMendixPreviewProps {
     /**
      * @deprecated Deprecated since version 9.18.0. Please use class property instead.
      */

@@ -35,8 +35,11 @@ const packageRoot = dirname(fileURLToPath(import.meta.url));
 const ckeditorRoot = dirname(require.resolve("ckeditor4/ckeditor.js"));
 const wordcountPluginDir = join(dirname(require.resolve("ckeditor-wordcount-plugin/package.json")), "wordcount");
 
-// The pwt output layout: dist/tmp/widgets/<packagePath>/<widgetname>/assets/…
-const assetsCKEditorDir = join(packageRoot, "dist/tmp/widgets/ckeditorformendix/richtext/assets/ckeditor");
+// The pwt output layout: dist/tmp/widgets/<packagePath>/<widgetname lowercased>/assets/…
+const assetsCKEditorDir = join(
+    packageRoot,
+    "dist/tmp/widgets/ckeditor4formendix/ckeditorformendix/assets/ckeditor"
+);
 
 const FROZEN_MTIME = new Date("2023-06-28T00:00:00Z"); // CKEditor 4.22.0 release; bump with the version
 

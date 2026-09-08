@@ -1,6 +1,6 @@
 {
-    "name": "@ckeditorformendix/rich-text-viewer",
-    "widgetName": "RichTextViewer",
+    "name": "@ckeditor4formendix/viewer",
+    "widgetName": "CKEditorViewerForMendix",
     "version": "3.0.0",
     "description": "Renders stored rich-text HTML for Mendix and executes microflow links on click.",
     "copyright": "© Mendix Technology BV 2015-2026",
@@ -12,15 +12,15 @@
         "developmentPort": 3001
     },
     "mxpackage": {
-        "name": "RichTextViewer",
+        "name": "CKEditorViewerForMendix",
         "type": "widget",
-        "mpkName": "ckeditorformendix.RichTextViewer.mpk"
+        "mpkName": "ckeditor4formendix.CKEditorViewerForMendix.mpk"
     },
-    "packagePath": "ckeditorformendix",
+    "packagePath": "ckeditor4formendix",
     "marketplace": {
         "minimumMXVersion": "11.6.0",
         "appNumber": 1715,
-        "appName": "CKEditor For Mendix"
+        "appName": "CKEditor4 for Mendix"
     },
     "scripts": {
         "start": "pluggable-widgets-tools start:web",
@@ -30,7 +30,7 @@
         "release": "pluggable-widgets-tools release:web"
     },
     "dependencies": {
-        "@ckeditorformendix/shared": "3.0.0",
+        "@ckeditor4formendix/shared": "3.0.0",
         "classnames": "^2.5.1",
         "dompurify": "^3.2.4"
     },

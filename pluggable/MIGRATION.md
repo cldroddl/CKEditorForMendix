@@ -35,11 +35,11 @@ paid/commercial.
     `loadCKEditor()` injects the script once, `CKEDITOR.replace()` on mount, guarded `destroy(true)` on unmount (handles
     React 19 StrictMode double-mount).
 -   A CKEditor 4.22.0 runtime is **bundled into the widget's own `assets/ckeditor/`** at build time (phase 6). By
-    default `resolveScriptUrl("")` loads it from `<app>/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js`
+    default `resolveScriptUrl("")` loads it from `<app>/widgets/ckeditor4formendix/ckeditorformendix/assets/ckeditor/ckeditor.js`
     (via `mx.remoteUrl`) — same origin, no external request, offline-safe, and the consumer just drops the `.mpk` in.
     `versionCheck` is forced `false` globally (see "Known limits"); `allowedContent = true` — ACF off, so stored HTML is
     not stripped (parity with the legacy full build).
--   The **"Editor script URL"** property is **read-only** in Studio Pro (`RichText.editorConfig.ts`); an empty value
+-   The **"Editor script URL"** property is **read-only** in Studio Pro (`CKEditorForMendix.editorConfig.ts`); an empty value
     means "use the bundled copy". `resolveScriptUrl` still handles an absolute or app-root-relative override if one is
     set in code.
 -   If the script never loads (offline, firewall, CSP), the widget renders a warning plus a plain `<textarea>` bound to
@@ -69,11 +69,11 @@ paid/commercial.
 Supported. CKEditor 4 is designed for many editors on one page: `CKEDITOR.replace` on the nameless host `<div>` gets an
 auto-unique `editor{n}` name, config is passed per-instance (never via the global `CKEDITOR.config`), plugin
 registration (`mendixlink`, `pastebase64`) is idempotent, and unmount cleanup targets only its own `instance.name`.
-The `RichTextViewer` never loads `ckeditor.js` at all, so any mix of editors + viewers coexists.
+The `CKEditorViewerForMendix` never loads `ckeditor.js` at all, so any mix of editors + viewers coexists.
 
-The **one constraint**: `ckeditor.js` loads exactly once per page. If two `RichText` widgets set **different**
+The **one constraint**: `ckeditor.js` loads exactly once per page. If two `CKEditorForMendix` widgets set **different**
 `editorScriptUrl` values, the first to load wins and the second is ignored (with a `console.error`). Use the same
-value on every RichText widget on a page.
+value on every CKEditorForMendix widget on a page.
 
 The `mendixlink` dialog is registered with the editor CKEditor passes at open time (`mendixLinkPlugin.ts` —
 `dialog.add("mendixLinkDialog", dialogEditor => buildDialog(dialogEditor))`), so each editor's "Insert Mendix link"
@@ -106,7 +106,7 @@ CKEditor 4 singleton — it just replaces the broken toolbar with an actionable 
 
 Two pluggable widgets ship from one package (`CKEditorForMendix` client module):
 
-1. **RichText (editor)** — `id: ckeditorformendix.RichText`
+1. **CKEditorForMendix (editor)** — `id: ckeditor4formendix.ckeditorformendix.CKEditorForMendix`
 
     - `messageString: EditableValue<string>` — the HTML attribute, two-way bound (`.readOnly` = editability)
     - Legacy interface: 14 `toolbar*` toggles + `customToolbars`, `enterMode`/`shiftEnterMode`, `enableSpellCheck`,
@@ -114,14 +114,14 @@ Two pluggable widgets ship from one package (`CKEditorForMendix` client module):
       `enableCodeHighlighting`, `countPlugin`, `imagePasteMode`, and the **microflow-link** plugin
     - `onChangeMicroflow` / `onKeyPressMicroflow` actions
 
-2. **RichTextViewer** — `id: ckeditorformendix.RichTextViewer`
+2. **CKEditorViewerForMendix** — `id: ckeditor4formendix.ckeditorviewerformendix.CKEditorViewerForMendix`
     - `messageString: EditableValue<string>` (read-only render)
     - Renders stored HTML, rehydrates `a.mx-microflow-link` placeholders, wires click → `mfName` action, always
       highlights `pre code`, clips to `cutOffRules` pixels
 
 Each package has a **hand-written `src/package.xml`** (pwt copies it verbatim). Its `<files>` entry must be the
-runtime **directory** (`<file path="ckeditorformendix/richtext/" />`), not a single `RichText.js` — the directory form
-is what registers `RichText.mjs`/`.css`/`assets/` too. With only `RichText.js` listed, the Dojo client still works
+runtime **directory** (`<file path="ckeditor4formendix/ckeditorformendix/" />`), not a single `CKEditorForMendix.js` — the directory form
+is what registers `CKEditorForMendix.mjs`/`.css`/`assets/` too. With only `CKEditorForMendix.js` listed, the Dojo client still works
 (it loads the AMD file) but the **React client** cannot find the ES module and Studio Pro reports
 _"…please check if they … are ES6 modules"_ on build.
 
@@ -232,7 +232,7 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
     plugin. `videodetector` from the legacy `lib/plugins/` is **not** a candidate — it had no `plugin.js` and was never
     referenced by the legacy widget.
 
-6. ✅ **CKEditor bundled in the `.mpk`.** `packages/rich-text/rollup.config.mjs` (a custom config pwt merges over its
+6. ✅ **CKEditor bundled in the `.mpk`.** `packages/ckeditor4-for-mendix/rollup.config.mjs` (a custom config pwt merges over its
    own) copies a CKEditor 4.22.0 runtime into the widget's `assets/ckeditor/` at build time — from dev deps
    `ckeditor4@4.22.0` (standard-all distribution) + `ckeditor-wordcount-plugin` (MIT), `moono-lisa` skin only, no
    samples, and locale files trimmed to `KEEP_LANGS` (`en`, `ko` — CKEditor falls back to `en` for any missing locale;
@@ -267,7 +267,7 @@ left at its default costs nothing.
 -   **`MICROFLOW_LINKS_ENABLED`** (default `true`). `false` → the **Microflow links** property group is
     removed from both widgets' settings in Studio Pro (`getProperties` in each `*.editorConfig.ts` drops
     the `microflowLinks` property and then the now-empty group), and the editor doesn't load the
-    `mendixlink` plugin or show its toolbar button (`RichText.tsx` passes the flag as
+    `mendixlink` plugin or show its toolbar button (`CKEditorForMendix.tsx` passes the flag as
     `Editor`'s `microflowLinksEnabled` prop). The `microflowLinks` property stays in the widget XML (so
     the generated typings and the runtime code are unchanged) — it is only hidden. Existing stored
     microflow-link anchors still render as plain links in the viewer.
@@ -280,7 +280,7 @@ left at its default costs nothing.
 -   `shared` is consumed by the widget bundlers as **compiled JS** (`dist/`), not raw TS.
 -   `.eslintrc.js` must use `require.resolve(...)` for the pwt base config (npm-workspaces resolution).
 -   CKEditor 4's `ckeditor.js` is a self-loading IIFE — it must be an external `<script>`, never Rollup-bundled.
--   `packages/rich-text/rollup.config.mjs` `bundle-ckeditor`: pwt instantiates the plugin once per output config
+-   `packages/ckeditor4-for-mendix/rollup.config.mjs` `bundle-ckeditor`: pwt instantiates the plugin once per output config
     (`.js` / `.mjs` / `editorPreview` / `editorConfig`), so the CKEditor copy is guarded by a **module-scope** flag to
     run once per build, not 4×. The delete / copy / `utimes` calls retry on `EBUSY`/`EPERM` — Windows Defender and the
     Search indexer briefly lock freshly-written files, which otherwise failed the build mid-run (`EBUSY: resource busy
@@ -293,7 +293,7 @@ left at its default costs nothing.
     `RichTextView` DOM wiring via `@testing-library/react`). This is the CI layer.
 -   **`npm run test:ct`** — Playwright Component Testing (`playwright-ct.config.ts`, specs in `tests/ct/*.ct.tsx`).
     Mounts `<RichTextView>` and `<Editor>` in real Chromium. The `<Editor>` specs load the real CKEditor 4 runtime
-    from `packages/rich-text/dist/tmp/widgets/…/assets/ckeditor` served as Vite `publicDir` — so `pretest:ct` runs a
+    from `packages/ckeditor4-for-mendix/dist/tmp/widgets/…/assets/ckeditor` served as Vite `publicDir` — so `pretest:ct` runs a
     build and the specs `test.skip` if the assets are missing. Covers the `BASE_EXTRA_PLUGINS` set, the load-failure
     `<textarea>` fallback, and `onChange` emission — things jsdom can't do (CKEditor needs `execCommand`/Range).
 -   **`npm run test:e2e`** — Playwright against a running Mendix app (`playwright.config.ts`, `tests/e2e/`). Not in CI;
@@ -309,7 +309,7 @@ left at its default costs nothing.
 
 -   **Licence (the reason this branch exists)**: CKEditor **4.22.0** is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1
     (`node_modules/ckeditor4/package.json` confirms). Under LGPL/MPL it can be used in a proprietary Mendix app with no
-    licence key and no copyleft on the app — the same footing the legacy Dojo widget relied on. The `rich-text` package
+    licence key and no copyleft on the app — the same footing the legacy Dojo widget relied on. The `editor` package
     stays `Apache-2.0`.
 -   **Security**: CKEditor 4 open source is **EOL (June 2023)**. 4.22.0 will not receive security patches. Since the
     editor runs `allowedContent: true` (ACF off), hostile markup pasted / imported / written by a microflow is stored
@@ -342,7 +342,7 @@ left at its default costs nothing.
 > 크스페이스·빌드 도구는 `react-ver`와 동일하고, **에디터 엔진만** CKEditor 5 → CKEditor 4로 교체했습니다.
 >
 > -   CKEditor 4.22.0은 **GPL-2.0 / LGPL-2.1 / MPL-1.1 3중 라이선스** — 라이선스 키 없이 비공개(프로프라이어터리) 앱에서
->     사용 가능. 그래서 `rich-text` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
+>     사용 가능. 그래서 `editor` 패키지는 `Apache-2.0` 유지. (구 Dojo 위젯과 동일한 근거)
 > -   대가: CKEditor 4 오픈소스는 **2023년 6월 EOL** — 보안 패치 없음. 라이선스가 결정적이지 않다면 `react-ver`
 >     (CKEditor 5) 권장.
 > -   **보안(뷰어 sanitize)**: 에디터가 `allowedContent: true`(ACF off)라 붙여넣기·임포트·마이크로플로우로 들어온
@@ -406,14 +406,14 @@ left at its default costs nothing.
 
 하나의 `CKEditorForMendix` client module에서 두 개의 pluggable 위젯이 배포됩니다.
 
-1. **RichText (에디터)** — `id: ckeditorformendix.RichText`
+1. **CKEditorForMendix (에디터)** — `id: ckeditor4formendix.ckeditorformendix.CKEditorForMendix`
 
     - `content: EditableValue<string>` — HTML 속성, 양방향 바인딩
     - `editability`는 `content.readOnly` + `content.setValue()`로 처리
     - 툴바 구성, enter 모드, 이미지 처리, 코드 하이라이팅, 글자 수 세기, oembed, 그리고 **microflow-link** 플러그인
     - `onChange` / `onKeyPress` 액션(`ActionValue`)
 
-2. **RichTextViewer (뷰어)** — `id: ckeditorformendix.RichTextViewer`
+2. **CKEditorViewerForMendix (뷰어)** — `id: ckeditor4formendix.ckeditorviewerformendix.CKEditorViewerForMendix`
     - `content: EditableValue<string>` (읽기 전용 렌더)
     - 저장된 HTML 렌더, `a.mx-microflow-link` placeholder 재수화(rehydrate), 클릭 → microflow 배선, 이미지 URL 치환, 코
       드 하이라이팅, 선택적 줄 수 제한(line clamp)

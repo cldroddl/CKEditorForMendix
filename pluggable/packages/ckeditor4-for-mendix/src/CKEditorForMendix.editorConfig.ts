@@ -1,5 +1,5 @@
-import { MICROFLOW_LINKS_ENABLED } from "@ckeditorformendix/shared";
-import { RichTextPreviewProps } from "../typings/RichTextProps";
+import { MICROFLOW_LINKS_ENABLED } from "@ckeditor4formendix/shared";
+import { CKEditorForMendixPreviewProps } from "../typings/CKEditorForMendixProps";
 
 type Properties = PropertyGroup[];
 
@@ -23,7 +23,7 @@ interface Problem {
     message: string;
 }
 
-export function getProperties(values: RichTextPreviewProps, defaultProperties: Properties): Properties {
+export function getProperties(values: CKEditorForMendixPreviewProps, defaultProperties: Properties): Properties {
     if (values.useCustomToolbar) {
         // The 14 Document toolbar toggles are ignored when a custom toolbar is used.
         [
@@ -64,7 +64,7 @@ export function getProperties(values: RichTextPreviewProps, defaultProperties: P
     return defaultProperties;
 }
 
-export function check(values: RichTextPreviewProps): Problem[] {
+export function check(values: CKEditorForMendixPreviewProps): Problem[] {
     const problems: Problem[] = [];
     if (values.useCustomToolbar && values.customToolbars.length === 0) {
         problems.push({

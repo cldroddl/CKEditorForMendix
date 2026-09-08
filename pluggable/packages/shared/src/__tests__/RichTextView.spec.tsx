@@ -17,7 +17,9 @@ function view(html: string, links: MicroflowLinkBinding[] = [], props: Partial<{
 describe("RichTextView — microflow links", () => {
     it("wires a click to the matching binding and marks the link bound", () => {
         const execute = jest.fn();
-        const { anchor } = view(`<a href="#" class="btn ${MICROFLOW_LINK_CLASS}" data-mf="Go">x</a>`, [{ name: "Go", execute }]);
+        const { anchor } = view(`<a href="#" class="btn ${MICROFLOW_LINK_CLASS}" data-mf="Go">x</a>`, [
+            { name: "Go", execute }
+        ]);
 
         expect(anchor()).not.toHaveClass("mx-microflow-link--unbound");
         anchor().click();
@@ -26,20 +28,26 @@ describe("RichTextView — microflow links", () => {
 
     it("prevents default navigation on click", () => {
         const execute = jest.fn();
-        const { anchor } = view(`<a href="#" class="${MICROFLOW_LINK_CLASS}" data-mf="Go">x</a>`, [{ name: "Go", execute }]);
+        const { anchor } = view(`<a href="#" class="${MICROFLOW_LINK_CLASS}" data-mf="Go">x</a>`, [
+            { name: "Go", execute }
+        ]);
         const evt = new MouseEvent("click", { bubbles: true, cancelable: true });
         anchor().dispatchEvent(evt);
         expect(evt.defaultPrevented).toBe(true);
     });
 
     it("marks a link unbound when no binding matches", () => {
-        const { anchor } = view(`<a class="${MICROFLOW_LINK_CLASS}" data-mf="Missing">x</a>`, [{ name: "Other", execute: jest.fn() }]);
+        const { anchor } = view(`<a class="${MICROFLOW_LINK_CLASS}" data-mf="Missing">x</a>`, [
+            { name: "Other", execute: jest.fn() }
+        ]);
         expect(anchor()).toHaveClass("mx-microflow-link--unbound");
         expect(() => anchor().click()).not.toThrow();
     });
 
     it("marks a link unbound when the binding has no executable action", () => {
-        const { anchor } = view(`<a class="${MICROFLOW_LINK_CLASS}" data-mf="Go">x</a>`, [{ name: "Go", execute: undefined }]);
+        const { anchor } = view(`<a class="${MICROFLOW_LINK_CLASS}" data-mf="Go">x</a>`, [
+            { name: "Go", execute: undefined }
+        ]);
         expect(anchor()).toHaveClass("mx-microflow-link--unbound");
     });
 
@@ -62,9 +70,17 @@ describe("RichTextView — microflow links", () => {
     it("re-wires when the html prop changes", () => {
         const execute = jest.fn();
         const { rerender, container } = render(
-            <RichTextView html={`<a class="${MICROFLOW_LINK_CLASS}" data-mf="A">a</a>`} links={[{ name: "B", execute }]} />
+            <RichTextView
+                html={`<a class="${MICROFLOW_LINK_CLASS}" data-mf="A">a</a>`}
+                links={[{ name: "B", execute }]}
+            />
         );
-        rerender(<RichTextView html={`<a class="${MICROFLOW_LINK_CLASS}" data-mf="B">b</a>`} links={[{ name: "B", execute }]} />);
+        rerender(
+            <RichTextView
+                html={`<a class="${MICROFLOW_LINK_CLASS}" data-mf="B">b</a>`}
+                links={[{ name: "B", execute }]}
+            />
+        );
         container.querySelector("a")!.click();
         expect(execute).toHaveBeenCalledTimes(1);
     });

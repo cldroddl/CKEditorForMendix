@@ -5,7 +5,7 @@
  *
  * Ported from the legacy Dojo widget's
  * `src/CKEditorForMendix/widget/lib/plugins/mendixlink/{plugin,dialogs/mendixlink}.js`,
- * but it writes the NEW wire format used by @ckeditorformendix/shared:
+ * but it writes the NEW wire format used by @ckeditor4formendix/shared:
  *
  *     <a href="#" class="<css> mx-microflow-link" data-mf="<linkName>" title="<title>">Label</a>
  *
@@ -15,7 +15,7 @@
  * Configured link names are passed via `config.mendixLink = { links: [{ name }] }`.
  */
 
-import { MICROFLOW_LINK_CLASS } from "@ckeditorformendix/shared";
+import { MICROFLOW_LINK_CLASS } from "@ckeditor4formendix/shared";
 
 export const MENDIX_LINK_PLUGIN = "mendixlink";
 

@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
-import { RichTextViewerPreviewProps } from "../typings/RichTextViewerProps";
+import { CKEditorViewerForMendixPreviewProps } from "../typings/CKEditorViewerForMendixProps";
 
-export function preview(props: RichTextViewerPreviewProps): ReactElement {
+export function preview(props: CKEditorViewerForMendixPreviewProps): ReactElement {
     return (
         <div
             style={{ font: "14px/1.4 sans-serif", color: "#3b4251" }}

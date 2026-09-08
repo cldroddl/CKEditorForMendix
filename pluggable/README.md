@@ -13,7 +13,7 @@ A CKEditor 4.22.0 runtime is **bundled into the `.mpk`** (~1.1 MB, `en`/`ko` loc
 rebuilt `.mpk` is byte-identical in its CKEditor part and Studio Pro skips re-extracting them on redeploy — which is
 what would otherwise fail on Windows against an open asset handle. First deploy / a "Clean deployment" still needs the
 app stopped and its browser tabs closed (see `MIGRATION.md` phase 6). To bundle another locale, add its code to
-`KEEP_LANGS` in `packages/rich-text/rollup.config.mjs`.
+`KEEP_LANGS` in `packages/ckeditor4-for-mendix/rollup.config.mjs`.
 
 ### Replaces the legacy widget — do not run both
 
@@ -32,15 +32,15 @@ Before adding this widget, remove the legacy one completely:
    `widget/lib/` assets are gone.
 4. Run the app and hard-refresh the browser (the legacy CKEditor may be cached).
 
-The new widgets appear in the toolbox as **Rich Text (CKEditor)** and **Rich Text Viewer (CKEditor)**.
+The new widgets appear in the toolbox as **CKEditor4 for Mendix** and **CKEditor4 viewer for Mendix**.
 
 ## Layout (npm workspaces)
 
 | Package                     | What                                                                                                                                                             |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/shared`           | Framework-agnostic logic: microflow-link parsing/serialization, image-URL resolution, toolbar presets, the `RichTextView` renderer. Plain `tsc` build → `dist/`. |
-| `packages/rich-text`        | The **editor** widget (`ckeditorformendix.richtext.RichText`). CKEditor 4.22.0 (runtime `<script>`) + the `mendixlink` plugin (`src/ckeditor4/`).                |
-| `packages/rich-text-viewer` | The **viewer** widget (`ckeditorformendix.richtextviewer.RichTextViewer`). Renders stored HTML, executes microflow links on click.                               |
+| `packages/ckeditor4-for-mendix`        | The **editor** widget (`ckeditor4formendix.ckeditorformendix.CKEditorForMendix`). CKEditor 4.22.0 (runtime `<script>`) + the `mendixlink` plugin (`src/ckeditor4/`).                |
+| `packages/ckeditor4viewer-for-mendix` | The **viewer** widget (`ckeditor4formendix.ckeditorviewerformendix.CKEditorViewerForMendix`). Renders stored HTML, executes microflow links on click.                               |
 
 ## Commands
 
@@ -83,13 +83,13 @@ it and live-reloads; `build` does not need it.
 
 -   Persistable entity `Test` with attribute `Content` (String, unlimited).
 -   Microflow `ACT_Open`: Create `Test` → Show page `Home_Web` with it as context. Set as the app's home / a button.
--   `Home_Web`: a Data view (context `Test`) containing the **Rich Text (CKEditor)** widget, `Content attribute` bound to
-    `Test.Content`. Add the **Rich Text Viewer (CKEditor)** below it, bound to the same attribute, to see the round trip.
+-   `Home_Web`: a Data view (context `Test`) containing the **CKEditor4 for Mendix** widget, `Content attribute` bound to
+    `Test.Content`. Add the **CKEditor4 viewer for Mendix** below it, bound to the same attribute, to see the round trip.
 -   Both widgets are `needsEntityContext="true"` — they must sit inside a Data view / List view, never on a bare page.
 
-**3. Microflow links** — nanoflows `NF_Alpha`, `NF_Beta` (each: Show message). On **Rich Text** → _Microflow links_ add
-`{ Link Name: "Alpha" }`. On **Rich Text Viewer** → _Microflow links_ add `{ Link Name: "Alpha", Microflow Name: NF_Alpha }`.
-To exercise the multi-instance fix, drop a second Rich Text in the same Data view with a different list (`"Beta"`) and
+**3. Microflow links** — nanoflows `NF_Alpha`, `NF_Beta` (each: Show message). On **CKEditor4 for Mendix** → _Microflow links_ add
+`{ Link Name: "Alpha" }`. On **CKEditor4 viewer for Mendix** → _Microflow links_ add `{ Link Name: "Alpha", Microflow Name: NF_Alpha }`.
+To exercise the multi-instance fix, drop a second CKEditor4 editor in the same Data view with a different list (`"Beta"`) and
 confirm each editor's "Insert a Mendix microflow link" dialog shows its own list.
 
 **4. Get the widgets in** — either:
@@ -99,7 +99,7 @@ confirm each editor's "Insert a Mendix microflow link" dialog shows its own list
 -   `npm run build`, then copy `packages/*/dist/<version>/*.mpk` into `<project>/widgets/` and in Studio Pro:
     right-click the app → **Update widgets**.
 
-CKEditor is bundled inside `RichText.mpk`, so nothing extra is needed. On **Windows**, if a redeploy ever fails with
+CKEditor is bundled inside `ckeditor4formendix.CKEditorForMendix.mpk`, so nothing extra is needed. On **Windows**, if a redeploy ever fails with
 "…`editor.css`… used by another process", stop the app + close the browser first (only bites after a widget rebuild —
 see `MIGRATION.md` phase 6).
 
@@ -140,14 +140,14 @@ character count (need a "full" CKEditor build), image handling, self-hosted asse
 CKEditor 4 is EOL and the editor runs with content filtering off, so the **viewer sanitizes stored HTML with
 [DOMPurify](https://github.com/cure53/DOMPurify)** (Apache-2.0) before rendering it: scripts, event handlers,
 `javascript:` URLs, `<style>` blocks, inline SVG/MathML and `<iframe>` are stripped; microflow links, images, tables,
-formatting and code blocks are kept. The **Rich Text Viewer → Sanitize HTML** property (default **on**) disables it
+formatting and code blocks are kept. The **CKEditor4 viewer for Mendix → Sanitize HTML** property (default **on**) disables it
 for content the app fully trusts and that needs stripped markup — leave it on unless you have a specific reason. The
 editor itself is not sanitized on save. See `MIGRATION.md` → "Known constraints / decisions" → Security.
 
 ## Licensing note
 
 CKEditor **4.22.0** is tri-licensed GPL-2.0 / LGPL-2.1 / MPL-1.1 (confirmed in `node_modules/ckeditor4/package.json`).
-Under LGPL/MPL it can ship inside a proprietary Mendix app with no licence key, so `rich-text` stays `Apache-2.0`. But
+Under LGPL/MPL it can ship inside a proprietary Mendix app with no licence key, so `editor` stays `Apache-2.0`. But
 4.22.0 is EOL — no security patches. `4.23.0+` ("CKEditor 4 LTS") is paid/commercial; do not upgrade past 4.22.0 on this
 branch.
 
@@ -165,7 +165,7 @@ shared 패키지·뷰어 위젯·워크스페이스·빌드 도구는 동일하�
 CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~1.1MB, `en`/`ko` 로케일만 — CKEditor는 없는 로케일을 `en`으로 폴백)
 — `.mpk`만 `widgets/`에 넣으면 동작, 오프라인 OK, CDN 불필요.
 위젯이 자기 `assets/ckeditor/`에서 로드하고 **"Editor script URL"** 속성은 읽기 전용입니다.
-다른 로케일이 필요하면 `packages/rich-text/rollup.config.mjs`의 `KEEP_LANGS`에 코드 추가.
+다른 로케일이 필요하면 `packages/ckeditor4-for-mendix/rollup.config.mjs`의 `KEEP_LANGS`에 코드 추가.
 번들 파일은 고정 타임스탬프를 가져서, 다시 빌드해도 `.mpk`의 CKEditor 부분이 바이트 동일 → Studio Pro가 재추출을 스킵
 → Windows에서 열린 `editor.css` 잠금을 회피 (`MIGRATION.md` phase 6 참고).
 
@@ -186,15 +186,15 @@ CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~1.1MB, `en`/`ko` �
    자산을 제거.
 4. 앱 실행 후 브라우저 강력 새로고침 (레거시 CKEditor가 캐시돼 있을 수 있음).
 
-새 위젯은 툴박스에 **Rich Text (CKEditor)** / **Rich Text Viewer (CKEditor)** 로 나타납니다.
+새 위젯은 툴박스에 **CKEditor4 for Mendix** / **CKEditor4 viewer for Mendix** 로 나타납니다.
 
 ## 구성 (npm workspaces)
 
 | 패키지                      | 내용                                                                                                                                    |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/shared`           | 프레임워크 비의존 로직: microflow-link 파싱/직렬화, 이미지 URL 해석, 툴바 프리셋, `RichTextView` 렌더러. `tsc` 빌드 → `dist/`.          |
-| `packages/rich-text`        | **에디터** 위젯 (`ckeditorformendix.richtext.RichText`). CKEditor 4.22.0(런타임 `<script>`) + `mendixlink` 플러그인 (`src/ckeditor4/`). |
-| `packages/rich-text-viewer` | **뷰어** 위젯 (`ckeditorformendix.richtextviewer.RichTextViewer`). 저장된 HTML 렌더, 클릭 시 microflow 링크 실행.                       |
+| `packages/ckeditor4-for-mendix`        | **에디터** 위젯 (`ckeditor4formendix.ckeditorformendix.CKEditorForMendix`). CKEditor 4.22.0(런타임 `<script>`) + `mendixlink` 플러그인 (`src/ckeditor4/`). |
+| `packages/ckeditor4viewer-for-mendix` | **뷰어** 위젯 (`ckeditor4formendix.ckeditorviewerformendix.CKEditorViewerForMendix`). 저장된 HTML 렌더, 클릭 시 microflow 링크 실행.                       |
 
 ## 명령 (`pluggable/`에서 실행)
 
@@ -233,13 +233,13 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
 
 -   지속형 엔티티 `Test` + `Content` (String, unlimited)
 -   마이크로플로우 `ACT_Open`: `Test` 생성 → `Home_Web` 페이지를 컨텍스트와 함께 표시. 홈페이지 또는 버튼에 연결
--   `Home_Web`: Data view(컨텍스트 `Test`) 안에 **Rich Text (CKEditor)** 위젯, `Content attribute` = `Test.Content`.
-    그 아래에 **Rich Text Viewer (CKEditor)**를 같은 attribute에 바인딩해 왕복 확인
+-   `Home_Web`: Data view(컨텍스트 `Test`) 안에 **CKEditor4 for Mendix** 위젯, `Content attribute` = `Test.Content`.
+    그 아래에 **CKEditor4 viewer for Mendix**를 같은 attribute에 바인딩해 왕복 확인
 -   두 위젯 모두 `needsEntityContext="true"` — 반드시 Data view / List view 안에 배치 (빈 페이지 직접 배치 불가)
 
-**3. Microflow links** — 나노플로우 `NF_Alpha`, `NF_Beta` (각각 Show message). **Rich Text** → *Microflow links*에
-`{ Link Name: "Alpha" }` 추가, **Rich Text Viewer** → *Microflow links*에 `{ Link Name: "Alpha", Microflow Name: NF_Alpha }`
-추가. 다중 인스턴스 수정 확인: 같은 Data view에 Rich Text 하나 더 넣고 목록을 다르게(`"Beta"`) → 각 에디터의
+**3. Microflow links** — 나노플로우 `NF_Alpha`, `NF_Beta` (각각 Show message). **CKEditor4 for Mendix** → *Microflow links*에
+`{ Link Name: "Alpha" }` 추가, **CKEditor4 viewer for Mendix** → *Microflow links*에 `{ Link Name: "Alpha", Microflow Name: NF_Alpha }`
+추가. 다중 인스턴스 수정 확인: 같은 Data view에 CKEditor4 에디터 하나 더 넣고 목록을 다르게(`"Beta"`) → 각 에디터의
 "Insert a Mendix microflow link" 다이얼로그가 자기 목록을 보여주는지 확인
 
 **4. 위젯 넣기** — 둘 중 하나:
@@ -249,7 +249,7 @@ npm run dev:viewer       # 뷰어 위젯 개발 서버
 -   `npm run build` 후 `packages/*/dist/<version>/*.mpk`를 `<project>/widgets/`에 복사 → Studio Pro에서 앱 우클릭 →
     **Update widgets**
 
-CKEditor는 `RichText.mpk` 안에 번들되어 있어 추가 작업이 없습니다. **Windows**에서 재배포가
+CKEditor는 `CKEditorForMendix.mpk` 안에 번들되어 있어 추가 작업이 없습니다. **Windows**에서 재배포가
 "…`editor.css`… used by another process"로 실패하면 앱 정지 + 브라우저 닫고 다시 시도하세요 (위젯을 다시 빌드한
 뒤에만 발생 — `MIGRATION.md` phase 6 참고).
 
@@ -289,13 +289,13 @@ Phase 1(스캐폴드 + 빌드 성공)과 Phase 2(microflow 링크)의 핵심이 
 CKEditor 4는 EOL이고 에디터는 콘텐츠 필터링을 끈 채로 동작하므로, **뷰어가 렌더 전에 저장 HTML을
 [DOMPurify](https://github.com/cure53/DOMPurify)**(Apache-2.0)로 정화합니다: `<script>`·이벤트 핸들러·
 `javascript:` URL·`<style>`·인라인 SVG/MathML·`<iframe>` 제거, microflow 링크·이미지·표·서식·코드 블록은 유지.
-**Rich Text Viewer → Sanitize HTML** 속성(기본 켜짐)으로 완전 신뢰 + 정화기가 벗기는 마크업이 필요한 앱은 끌 수
+**CKEditor4 viewer for Mendix → Sanitize HTML** 속성(기본 켜짐)으로 완전 신뢰 + 정화기가 벗기는 마크업이 필요한 앱은 끌 수
 있으나, 특별한 이유가 없으면 켜 두세요. 에디터 저장 시점은 정화하지 않습니다. `MIGRATION.md` → "Known constraints /
 decisions" → Security 참고.
 
 ## 라이선스 노트
 
 CKEditor **4.22.0**은 GPL-2.0 / LGPL-2.1 / MPL-1.1 3중 라이선스입니다 (`node_modules/ckeditor4/package.json`에서 확인).
-LGPL/MPL 하에서 라이선스 키 없이 비공개 Mendix 앱에 포함 가능하므로 `rich-text`는 `Apache-2.0`를 유지합니다.
+LGPL/MPL 하에서 라이선스 키 없이 비공개 Mendix 앱에 포함 가능하므로 `editor`는 `Apache-2.0`를 유지합니다.
 단 4.22.0은 EOL이라 보안 패치가 없습니다.
 `4.23.0+`("CKEditor 4 LTS")는 유료/상용이므로, 이 브랜치에서 4.22.0을 넘겨 업그레이드하지 마세요.

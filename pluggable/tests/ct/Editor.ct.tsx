@@ -1,19 +1,21 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test } from "@playwright/experimental-ct-react";
-import { Editor, EditorProps } from "../../packages/rich-text/src/components/Editor";
+import { Editor, EditorProps } from "../../packages/ckeditor4-for-mendix/src/components/Editor";
 
 // Loads the REAL CKEditor 4 runtime (built into the widget's assets/) in Chromium.
 // jsdom can't run CKEditor (execCommand / Range), so these live here.
 
 // cwd is `pluggable/` (npm run test:ct).
 const assetsBuilt = existsSync(
-    resolve("packages/rich-text/dist/tmp/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js")
+    resolve(
+        "packages/ckeditor4-for-mendix/dist/tmp/widgets/ckeditor4formendix/ckeditorformendix/assets/ckeditor/ckeditor.js"
+    )
 );
 
 test.skip(!assetsBuilt, "run `npm run build` first — CKEditor assets are served from dist/tmp");
 
-const CKEDITOR_URL = "/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js";
+const CKEDITOR_URL = "/ckeditor4formendix/ckeditorformendix/assets/ckeditor/ckeditor.js";
 
 const baseProps: EditorProps = {
     value: "<p>hello</p>",

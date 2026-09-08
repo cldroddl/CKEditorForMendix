@@ -1,5 +1,5 @@
 /**
- * This file was generated from RichTextViewer.xml
+ * This file was generated from CKEditorViewerForMendix.xml
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
@@ -16,7 +16,7 @@ export interface MicroflowLinksPreviewType {
     mfName: {} | null;
 }
 
-export interface RichTextViewerContainerProps {
+export interface CKEditorViewerForMendixContainerProps {
     name: string;
     class: string;
     style?: CSSProperties;
@@ -27,7 +27,7 @@ export interface RichTextViewerContainerProps {
     sanitizeContent: boolean;
 }
 
-export interface RichTextViewerPreviewProps {
+export interface CKEditorViewerForMendixPreviewProps {
     /**
      * @deprecated Deprecated since version 9.18.0. Please use class property instead.
      */

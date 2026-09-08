@@ -13,8 +13,8 @@ Mendix 위젯 개발을 몰라도 읽을 수 있도록 배경부터 정리합니
 
 | 위젯                              | 하는 일                                                                                                             |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **에디터** (Rich Text / CKEditor) | 사용자가 굵게·목록·표·이미지 등을 넣어 글을 쓰고, 결과를 HTML 문자열로 Mendix 속성(attribute)에 저장                |
-| **뷰어** (Rich Text Viewer)       | 저장된 HTML을 읽기 전용으로 화면에 렌더. 본문 안의 특수 링크를 클릭하면 마이크로플로우(서버/클라이언트 로직)를 실행 |
+| **에디터** (CKEditor4) | 사용자가 굵게·목록·표·이미지 등을 넣어 글을 쓰고, 결과를 HTML 문자열로 Mendix 속성(attribute)에 저장                |
+| **뷰어** (CKEditor4 viewer)       | 저장된 HTML을 읽기 전용으로 화면에 렌더. 본문 안의 특수 링크를 클릭하면 마이크로플로우(서버/클라이언트 로직)를 실행 |
 
 원래 이 위젯은 2016년경 **Dojo/Dijit**(Mendix의 옛 프론트엔드 프레임워크)로 만들어졌고, CKEditor 4 엔진을 통째로 저장소에 넣어(vendoring) 썼습니다. 지금은 이걸 **React 기반 "pluggable 위젯"**으로 다시 쓰는 중이며, 그 새 코드가 `pluggable/` 폴더에 있습니다.
 
@@ -76,7 +76,7 @@ npm **workspaces 모노레포**입니다. 패키지 3개:
 
 ```
 pluggable/
-├── package.json              workspaces: [packages/shared, packages/rich-text, packages/rich-text-viewer]
+├── package.json              workspaces: [packages/shared, packages/ckeditor4-for-mendix, packages/ckeditor4viewer-for-mendix]
 ├── tsconfig.base.json        공통 TS 설정 (target ES2020, jsx: react-jsx, strict)
 ├── .prettierrc.json          코드 포맷 규칙
 ├── MIGRATION.md              레거시 → 재작성 매핑, 남은 작업(Phases), 결정 필요 항목
@@ -84,8 +84,8 @@ pluggable/
 │
 ├── packages/
 │   ├── shared/               에디터·뷰어가 공유하는 순수 로직 (React 위젯 아님)
-│   ├── rich-text/            에디터 위젯   → ckeditorformendix.RichText.mpk
-│   └── rich-text-viewer/     뷰어 위젯     → ckeditorformendix.RichTextViewer.mpk
+│   ├── ckeditor4-for-mendix/            에디터 위젯   → ckeditor4formendix.CKEditorForMendix.mpk
+│   └── ckeditor4viewer-for-mendix/     뷰어 위젯     → ckeditor4formendix.CKEditorViewerForMendix.mpk
 │
 └── tests/                    로컬 Mendix 테스트 앱 (아래 8절)
 ```
@@ -103,12 +103,12 @@ React 위젯이 아니라 일반 TS 라이브러리입니다. `tsc`로 `dist/`�
 | `src/index.ts`                         | 위 모듈들을 재노출                                                                                                                     |
 | `src/__tests__/microflowLinks.spec.ts` | Jest 유닛 테스트 (7개, 통과)                                                                                                           |
 
-### 4.2 `packages/rich-text` — 에디터 위젯
+### 4.2 `packages/ckeditor4-for-mendix` — 에디터 위젯
 
 ```
 src/
-├── RichText.xml               위젯 설정 정의 (속성 40여 개, 레거시 인터페이스 그대로)
-├── RichText.tsx               ★ 위젯 진입점. Mendix 속성 → <Editor> props 매핑
+├── CKEditorForMendix.xml               위젯 설정 정의 (속성 40여 개, 레거시 인터페이스 그대로)
+├── CKEditorForMendix.tsx               ★ 위젯 진입점. Mendix 속성 → <Editor> props 매핑
 ├── components/
 │   └── Editor.tsx             ★ React ↔ CKEditor 4 래퍼 (CKEDITOR.replace 호출, 정리, 이벤트)
 ├── ckeditor4/                 CKEditor 4 관련 코드 (전부 TypeScript)
@@ -116,10 +116,10 @@ src/
 │   ├── mendixLinkPlugin.ts    "Insert Mendix microflow link" 커스텀 플러그인 (버튼+메뉴+다이얼로그)
 │   ├── pasteBase64Plugin.ts   이미지 base64 붙여넣기 플러그인
 │   └── buildToolbar.ts        14개 toolbar* 불리언 + customToolbars → CKEditor config 변환
-├── RichText.editorConfig.ts   Studio Pro 설정 화면 로직 (속성 숨김/표시, 유효성 검사)
-├── RichText.editorPreview.tsx Studio Pro 디자인 모드 미리보기
-├── ui/RichText.css
-└── package.xml                .mpk 매니페스트 (clientModule 이름 = ckeditorformendix.richtext.RichText)
+├── CKEditorForMendix.editorConfig.ts   Studio Pro 설정 화면 로직 (속성 숨김/표시, 유효성 검사)
+├── CKEditorForMendix.editorPreview.tsx Studio Pro 디자인 모드 미리보기
+├── ui/CKEditorForMendix.css
+└── package.xml                .mpk 매니페스트 (clientModule 이름 = ckeditor4formendix.ckeditorformendix.CKEditorForMendix)
 
 rollup.config.mjs             pwt 기본 설정에 병합 — 빌드 시 CKEditor 트리를 assets/ckeditor/로 복사(고정 mtime)
 ```
@@ -129,15 +129,15 @@ rollup.config.mjs             pwt 기본 설정에 병합 — 빌드 시 CKEdito
     오프라인 OK. "Editor script URL" 속성은 읽기 전용. (Windows 재배포 잠금 회피 방식은 `MIGRATION.md` phase 6.)
 -   한 페이지에 에디터가 여러 개 있어도 `ckeditor.js`는 한 번만 로드되고, 인스턴스별로 `CKEDITOR.replace(element, config)`에 설정을 따로 넘깁니다.
 
-### 4.3 `packages/rich-text-viewer` — 뷰어 위젯
+### 4.3 `packages/ckeditor4viewer-for-mendix` — 뷰어 위젯
 
 ```
 src/
-├── RichTextViewer.xml           위젯 설정 (messageString, microflowLinks[이름+마이크로플로우], cutOffRules)
-├── RichTextViewer.tsx           ★ 진입점. 저장 HTML을 migrateStoredValue로 변환 후 <RichTextView>로 렌더
-├── RichTextViewer.editorConfig.ts
-├── RichTextViewer.editorPreview.tsx
-├── ui/RichTextViewer.css
+├── CKEditorViewerForMendix.xml           위젯 설정 (messageString, microflowLinks[이름+마이크로플로우], cutOffRules)
+├── CKEditorViewerForMendix.tsx           ★ 진입점. 저장 HTML을 migrateStoredValue로 변환 후 <RichTextView>로 렌더
+├── CKEditorViewerForMendix.editorConfig.ts
+├── CKEditorViewerForMendix.editorPreview.tsx
+├── ui/CKEditorViewerForMendix.css
 └── package.xml
 ```
 
@@ -153,9 +153,9 @@ src/
       │  Data view가 위젯에 속성을 바인딩
       ▼
 ┌─────────────────────────────┐        ┌──────────────────────────────┐
-│  에디터 위젯 (RichText)      │        │  뷰어 위젯 (RichTextViewer)   │
+│  에디터 위젯 (CKEditorForMendix)      │        │  뷰어 위젯 (CKEditorViewerForMendix)   │
 │                             │        │                              │
-│  RichText.tsx               │        │  RichTextViewer.tsx          │
+│  CKEditorForMendix.tsx               │        │  CKEditorViewerForMendix.tsx          │
 │    messageString.value ──┐  │        │    messageString.value       │
 │                          ▼  │        │        │                     │
 │  Editor.tsx                  │       │        ▼ migrateStoredValue  │
@@ -183,21 +183,21 @@ src/
       │  pwt (Rollup + TypeScript)  ← npm run build
       ▼
 packages/<widget>/dist/<version>/
-      ├── ckeditorformendix.RichText.mpk         ← 이게 Mendix에 넣는 최종 파일
+      ├── ckeditor4formendix.CKEditorForMendix.mpk         ← 이게 Mendix에 넣는 최종 파일
       └── (mpk 내부)
-          ├── RichText.xml               속성 정의
-          ├── RichText.js                런타임 번들 (AMD 형식, 구 클라이언트용)
-          ├── RichText.mjs               런타임 번들 (ES 모듈, 신 React 클라이언트용)
-          ├── RichText.editorConfig.js   Studio Pro 설정 로직
-          ├── RichText.editorPreview.js  Studio Pro 미리보기
+          ├── CKEditorForMendix.xml               속성 정의
+          ├── CKEditorForMendix.js                런타임 번들 (AMD 형식, 구 클라이언트용)
+          ├── CKEditorForMendix.mjs               런타임 번들 (ES 모듈, 신 React 클라이언트용)
+          ├── CKEditorForMendix.editorConfig.js   Studio Pro 설정 로직
+          ├── CKEditorForMendix.editorPreview.js  Studio Pro 미리보기
           ├── assets/ckeditor/           ← 번들된 CKEditor 4.22.0 런타임 (고정 mtime)
           └── package.xml
 ```
 
 -   **위젯 하나당 `.mpk` 하나.** 레거시는 한 `.mpk`에 에디터+뷰어를 같이 담았지만, pwt는 npm 패키지 = `.mpk` 1:1이라 파일이 두 개입니다. 앱에는 둘 다 임포트합니다.
 -   에디터 `.mpk`는 번들된 CKEditor 때문에 ~1.1MB (뷰어는 ~32KB). CKEditor는 git에 없고 빌드 시 dev 의존성에서 복사됨 (고정 타임스탬프, 로케일은 `en`/`ko`만).
--   `RichText.js`(AMD) / `RichText.mjs`(ESM) **이중 출력**은 pwt가 자동으로 만듭니다. 소스가 아니라 빌드 결과물입니다.
--   `typings/RichTextProps.d.ts`는 `RichText.xml`에서 **자동 생성**되는 타입. `RichText.tsx`가 이걸 `props` 타입으로 씁니다. XML을 고치면 타입도 바뀝니다.
+-   `CKEditorForMendix.js`(AMD) / `CKEditorForMendix.mjs`(ESM) **이중 출력**은 pwt가 자동으로 만듭니다. 소스가 아니라 빌드 결과물입니다.
+-   `typings/CKEditorForMendixProps.d.ts`는 `CKEditorForMendix.xml`에서 **자동 생성**되는 타입. `CKEditorForMendix.tsx`가 이걸 `props` 타입으로 씁니다. XML을 고치면 타입도 바뀝니다.
 
 ---
 

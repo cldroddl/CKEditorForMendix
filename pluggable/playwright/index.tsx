@@ -1,3 +1,3 @@
 // Playwright Component Testing entry point. Kept minimal — no global providers.
-import "../packages/rich-text/src/ui/RichText.css";
-import "../packages/rich-text-viewer/src/ui/RichTextViewer.css";
+import "../packages/ckeditor4-for-mendix/src/ui/CKEditorForMendix.css";
+import "../packages/ckeditor4viewer-for-mendix/src/ui/CKEditorViewerForMendix.css";

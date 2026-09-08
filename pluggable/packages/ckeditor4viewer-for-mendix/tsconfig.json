@@ -3,8 +3,8 @@
     "compilerOptions": {
         "baseUrl": "./",
         "paths": {
-            "@ckeditorformendix/shared": ["../shared/dist/index.d.ts"],
-            "@ckeditorformendix/shared/*": ["../shared/dist/*"]
+            "@ckeditor4formendix/shared": ["../shared/dist/index.d.ts"],
+            "@ckeditor4formendix/shared/*": ["../shared/dist/*"]
         }
     },
     "include": ["./src", "./typings"]

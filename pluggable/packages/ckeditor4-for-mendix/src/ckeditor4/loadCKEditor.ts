@@ -6,7 +6,7 @@
  *
  * The widget's build bundles a CKEditor 4.22.0 runtime into its own
  * `assets/ckeditor/` (see `rollup.config.mjs`), so by default it loads from
- * `<app>/widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js` — same
+ * `<app>/widgets/ckeditor4formendix/ckeditorformendix/assets/ckeditor/ckeditor.js` — same
  * origin, no external request, offline-safe, like the legacy vendored widget.
  * The bundled files are stamped with a fixed mtime so a rebuilt `.mpk` is
  * byte-identical and Studio Pro's incremental deploy skips re-extracting them
@@ -17,7 +17,7 @@
 export const CDN_CKEDITOR_URL = "https://cdn.ckeditor.com/4.22.0/full-all/ckeditor.js";
 
 /** Where the widget build drops the bundled CKEditor, relative to the app root. */
-const BUNDLED_PATH = "widgets/ckeditorformendix/richtext/assets/ckeditor/ckeditor.js";
+const BUNDLED_PATH = "widgets/ckeditor4formendix/ckeditorformendix/assets/ckeditor/ckeditor.js";
 
 /** The exact CKEditor version this widget bundles (keep in sync with `rollup.config.mjs`). */
 export const BUNDLED_CKEDITOR_VERSION = "4.22.0";

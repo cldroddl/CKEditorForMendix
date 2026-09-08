@@ -1,11 +1,11 @@
 import { ReactElement } from "react";
-import { RichTextPreviewProps } from "../typings/RichTextProps";
+import { CKEditorForMendixPreviewProps } from "../typings/CKEditorForMendixProps";
 
 /**
  * Design-mode preview. CKEditor is NOT loaded here (it touches window/document at
  * import time and is heavy); a lightweight stand-in is rendered instead.
  */
-export function preview(props: RichTextPreviewProps): ReactElement {
+export function preview(props: CKEditorForMendixPreviewProps): ReactElement {
     const toolbar = props.useCustomToolbar ? "custom" : "document";
     return (
         <div
@@ -33,5 +33,5 @@ export function preview(props: RichTextPreviewProps): ReactElement {
 }
 
 export function getPreviewCss(): string {
-    return require("./ui/RichText.css");
+    return require("./ui/CKEditorForMendix.css");
 }

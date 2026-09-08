@@ -1,11 +1,11 @@
 import { ReactElement, useMemo } from "react";
 import { ValueStatus } from "mendix";
-import { MicroflowLinkBinding, RichTextView, migrateStoredValue, sanitizeRichText } from "@ckeditorformendix/shared";
-import { RichTextViewerContainerProps } from "../typings/RichTextViewerProps";
+import { MicroflowLinkBinding, RichTextView, migrateStoredValue, sanitizeRichText } from "@ckeditor4formendix/shared";
+import { CKEditorViewerForMendixContainerProps } from "../typings/CKEditorViewerForMendixProps";
 
-import "./ui/RichTextViewer.css";
+import "./ui/CKEditorViewerForMendix.css";
 
-export function RichTextViewer(props: RichTextViewerContainerProps): ReactElement | null {
+export function CKEditorViewerForMendix(props: CKEditorViewerForMendixContainerProps): ReactElement | null {
     const { messageString, microflowLinks, cutOffRules, sanitizeContent, class: className } = props;
 
     // Migrate legacy microflow-link anchors first (needs the inline onclick that

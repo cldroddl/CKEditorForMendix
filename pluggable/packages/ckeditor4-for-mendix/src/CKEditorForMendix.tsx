@@ -1,13 +1,13 @@
 import { ReactElement, useCallback, useRef } from "react";
 import { ValueStatus } from "mendix";
-import { MICROFLOW_LINKS_ENABLED } from "@ckeditorformendix/shared";
-import { RichTextContainerProps } from "../typings/RichTextProps";
+import { MICROFLOW_LINKS_ENABLED } from "@ckeditor4formendix/shared";
+import { CKEditorForMendixContainerProps } from "../typings/CKEditorForMendixProps";
 import { Editor } from "./components/Editor";
 import { resolveScriptUrl } from "./ckeditor4/loadCKEditor";
 
-import "./ui/RichText.css";
+import "./ui/CKEditorForMendix.css";
 
-export function RichText(props: RichTextContainerProps): ReactElement | null {
+export function CKEditorForMendix(props: CKEditorForMendixContainerProps): ReactElement | null {
     const { messageString, onChangeMicroflow, onKeyPressMicroflow, microflowLinks } = props;
     const keyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 

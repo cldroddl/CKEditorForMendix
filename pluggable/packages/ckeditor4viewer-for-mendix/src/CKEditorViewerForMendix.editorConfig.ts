@@ -1,5 +1,5 @@
-import { MICROFLOW_LINKS_ENABLED } from "@ckeditorformendix/shared";
-import { RichTextViewerPreviewProps } from "../typings/RichTextViewerProps";
+import { MICROFLOW_LINKS_ENABLED } from "@ckeditor4formendix/shared";
+import { CKEditorViewerForMendixPreviewProps } from "../typings/CKEditorViewerForMendixProps";
 
 type Properties = PropertyGroup[];
 
@@ -20,7 +20,7 @@ interface Problem {
     message: string;
 }
 
-export function getProperties(_values: RichTextViewerPreviewProps, defaultProperties: Properties): Properties {
+export function getProperties(_values: CKEditorViewerForMendixPreviewProps, defaultProperties: Properties): Properties {
     if (!MICROFLOW_LINKS_ENABLED) {
         for (const group of defaultProperties) {
             if (group.properties) {
@@ -35,7 +35,7 @@ export function getProperties(_values: RichTextViewerPreviewProps, defaultProper
     return defaultProperties;
 }
 
-export function check(values: RichTextViewerPreviewProps): Problem[] {
+export function check(values: CKEditorViewerForMendixPreviewProps): Problem[] {
     const problems: Problem[] = [];
     if (!MICROFLOW_LINKS_ENABLED) {
         return problems;
