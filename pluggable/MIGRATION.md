@@ -300,8 +300,10 @@ left at its default costs nothing.
     needs the runtime + hand-wired microflow links (`tests/e2e/README.md`). Covers microflow execution and the
     editor↔viewer attribute round-trip.
 -   Playwright browsers install outside the repo (`~/…/ms-playwright`); `npx playwright install chromium` once.
-    `tests/ct` / `tests/e2e` source is committed (re-included past the `/tests/*` ignore); `playwright/.cache`,
-    `test-results`, `playwright-report` are ignored.
+    Behind a proxy that blocks Playwright's browser CDN (the download does **not** use `.npmrc` proxy config, only the
+    `HTTPS_PROXY` env var), set `PW_CHROME_CHANNEL=chrome` (or `msedge`) to drive the machine's installed browser
+    instead, or `PW_CHROME_PATH` to point at an unpacked build. `tests/ct` / `tests/e2e` source is committed
+    (re-included past the `/tests/*` ignore); `playwright/.cache`, `test-results`, `playwright-report` are ignored.
 
 ## Known constraints / decisions
 

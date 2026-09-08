@@ -11,7 +11,16 @@ import { defineConfig, devices } from "@playwright/experimental-ct-react";
  * the tests skip themselves if `dist/tmp/.../assets/ckeditor` is missing.
  *
  * Run: `npm run test:ct` (from `pluggable/`). Not part of `npm test`.
+ *
+ * Browser: by default Playwright's own Chromium (`npx playwright install chromium`).
+ * Behind a proxy that blocks Playwright's CDN, set `PW_CHROME_CHANNEL=chrome` (or
+ * `msedge`) to drive the copy of Chrome / Edge already installed on the machine —
+ * no download. `PW_CHROME_PATH=C:\path\to\chrome.exe` points at an arbitrary
+ * build (e.g. an unpacked "Chrome for Testing").
  */
+const channel = process.env.PW_CHROME_CHANNEL;
+const executablePath = process.env.PW_CHROME_PATH;
+
 export default defineConfig({
     testDir: "tests/ct",
     testMatch: "**/*.ct.tsx",
@@ -34,5 +43,14 @@ export default defineConfig({
             }
         }
     },
-    projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }]
+    projects: [
+        {
+            name: "chromium",
+            use: {
+                ...devices["Desktop Chrome"],
+                ...(channel ? { channel } : {}),
+                ...(executablePath ? { launchOptions: { executablePath } } : {})
+            }
+        }
+    ]
 });

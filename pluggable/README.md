@@ -50,7 +50,7 @@ Run from `pluggable/`:
 npm install
 npm run build            # build shared, then both widget .mpk files
 npm test                 # shared unit tests (jest + jsdom)
-npm run test:ct          # component tests (Playwright + real Chromium) — needs `npx playwright install chromium`
+npm run test:ct          # component tests (Playwright) — `npx playwright install chromium`, or PW_CHROME_CHANNEL=chrome to use installed Chrome
 npm run test:e2e         # end-to-end tests against a running Mendix app — see tests/e2e/README.md
 npm run lint             # prettier + eslint across packages
 
@@ -202,7 +202,7 @@ CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~1.1MB, `en`/`ko` �
 npm install
 npm run build            # shared 빌드 후 두 위젯 .mpk 생성
 npm test                 # shared 유닛 테스트 (jest + jsdom)
-npm run test:ct          # 컴포넌트 테스트 (Playwright + 실제 크로미움) — `npx playwright install chromium` 필요
+npm run test:ct          # 컴포넌트 테스트 (Playwright) — `npx playwright install chromium`, 또는 PW_CHROME_CHANNEL=chrome 로 설치된 Chrome 사용
 npm run test:e2e         # 실행 중인 Mendix 앱 대상 E2E — tests/e2e/README.md 참고
 npm run lint             # prettier + eslint (전체 패키지)
 
