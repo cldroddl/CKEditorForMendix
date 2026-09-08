@@ -1,3 +1,4 @@
+import { MICROFLOW_LINKS_ENABLED } from "@ckeditorformendix/shared";
 import { RichTextPreviewProps } from "../typings/RichTextProps";
 
 type Properties = PropertyGroup[];
@@ -55,6 +56,11 @@ export function getProperties(values: RichTextPreviewProps, defaultProperties: P
     }
     // The script location is fixed (app's theme/web/ckeditor/); show it but don't let it be edited.
     setReadOnly(defaultProperties, "editorScriptUrl");
+
+    if (!MICROFLOW_LINKS_ENABLED) {
+        hideProperty(defaultProperties, "microflowLinks");
+        removeEmptyGroup(defaultProperties, "Microflow links");
+    }
     return defaultProperties;
 }
 
@@ -85,6 +91,14 @@ function hideProperty(groups: Properties, key: string): void {
         if (group.propertyGroups) {
             hideProperty(group.propertyGroups, key);
         }
+    }
+}
+
+/** Drop a top-level property group once it has no visible properties left. */
+function removeEmptyGroup(groups: Properties, caption: string): void {
+    const idx = groups.findIndex(g => g.caption === caption && !g.properties?.length && !g.propertyGroups?.length);
+    if (idx !== -1) {
+        groups.splice(idx, 1);
     }
 }
 

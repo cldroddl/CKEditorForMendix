@@ -37,6 +37,7 @@ const baseProps: EditorProps = {
     countPlugin: false,
     countPluginMaxCount: 0,
     links: [{ name: "Alpha" }],
+    microflowLinksEnabled: true,
     toolbarDocument: true,
     toolbarClipboard: true,
     toolbarEditing: true,
@@ -78,6 +79,16 @@ test("shows the microflow-link toolbar button with its icon", async ({ mount, pa
     // The plugin is JS-registered (no icon folder) so it styles the class itself
     // with the legacy "mx" PNG data URI — regression guard for the "blank icon" bug.
     await expect(icon).toHaveCSS("background-image", /data:image\/png;base64,/);
+});
+
+test("omits the microflow-link button when microflowLinksEnabled is false", async ({ mount, page }) => {
+    const component = await mount(<Editor {...baseProps} microflowLinksEnabled={false} />);
+    await expect(component.locator(".cke_top")).toBeVisible({ timeout: 20_000 });
+
+    await expect(page.locator(".cke_button__mendixlink_icon")).toHaveCount(0);
+    await expect
+        .poll(() => page.evaluate(() => "mendixlink" in ((window as any).CKEDITOR?.plugins?.registered ?? {})))
+        .toBe(false);
 });
 
 test("loads the full-preset plugin set (BASE_EXTRA_PLUGINS regression guard)", async ({ mount, page }) => {

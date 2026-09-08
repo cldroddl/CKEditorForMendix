@@ -31,6 +31,8 @@ export interface EditorProps extends ToolbarBooleans {
     countPlugin: boolean;
     countPluginMaxCount: number;
     links: Array<{ name: string }>;
+    /** `MICROFLOW_LINKS_ENABLED` build flag — load the `mendixlink` plugin + button. */
+    microflowLinksEnabled: boolean;
     onChange: (html: string) => void;
     onBlur: (html: string) => void;
     onKey: (html: string) => void;
@@ -44,7 +46,8 @@ const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
  * present as folders in `assets/ckeditor/plugins/` and give the same toolbar the
  * legacy `preset: "full"` build had — Font, colours, Justify, Find/Replace,
  * CreateDiv, Show blocks, forms, Iframe, Page break, Smiley, Templates, etc.
- * Plus the always-on custom/behaviour plugins (`divarea`, `mendixlink`, …).
+ * Plus the always-on custom/behaviour plugins (`divarea`, …). `mendixlink` is
+ * added separately, gated by the `microflowLinksEnabled` build flag.
  *
  * `flash` is intentionally NOT here: the legacy widget ran CKEditor 4.10, but
  * 4.11+ deprecated the plugin (it emits `editor-plugin-deprecated` on init) and
@@ -52,7 +55,6 @@ const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
  */
 const BASE_EXTRA_PLUGINS = [
     "divarea",
-    "mendixlink",
     "tableresize",
     "maximize",
     "widget",
@@ -125,11 +127,14 @@ export function Editor(props: EditorProps): ReactElement {
                 if (destroyed) {
                     return;
                 }
-                registerMendixLinkPlugin();
                 registerPasteBase64Plugin();
 
                 const p = propsRef.current;
                 const extraPlugins = [...BASE_EXTRA_PLUGINS];
+                if (p.microflowLinksEnabled) {
+                    registerMendixLinkPlugin();
+                    extraPlugins.push("mendixlink");
+                }
                 if (p.imagePasteMode === "base64") {
                     extraPlugins.push("pastebase64");
                 }

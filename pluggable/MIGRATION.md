@@ -258,6 +258,20 @@ Everything else — `messageString`, all 14 `toolbar*` booleans, `useCustomToolb
    guard, C2 emit only on real change); C1 (`allowedContent: true` — editor parity, not sanitization) is now backed by
    viewer-side DOMPurify (`[상속-1]` closed), so ACF-off is an accepted posture.
 
+### Build flags — `packages/shared/src/featureFlags.ts`
+
+Compile-time toggles for the **widget distributor** (not app devs, not end users). Flip a value and
+`npm run build`; `shared` rebuilds first, then both widgets. Dead branches are tree-shaken, so a flag
+left at its default costs nothing.
+
+-   **`MICROFLOW_LINKS_ENABLED`** (default `true`). `false` → the **Microflow links** property group is
+    removed from both widgets' settings in Studio Pro (`getProperties` in each `*.editorConfig.ts` drops
+    the `microflowLinks` property and then the now-empty group), and the editor doesn't load the
+    `mendixlink` plugin or show its toolbar button (`RichText.tsx` passes the flag as
+    `Editor`'s `microflowLinksEnabled` prop). The `microflowLinks` property stays in the widget XML (so
+    the generated typings and the runtime code are unchanged) — it is only hidden. Existing stored
+    microflow-link anchors still render as plain links in the viewer.
+
 ### Build/tooling notes
 
 -   pwt resolved to **11.12.0** (Node ≥ 20; 11.13 needs Node 22 and this machine is on Node 24).

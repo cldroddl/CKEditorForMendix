@@ -1,3 +1,4 @@
+export * from "./featureFlags";
 export * from "./microflowLinks";
 export * from "./imageUrls";
 export * from "./sanitizeHtml";

@@ -32,7 +32,9 @@ describe("sanitizeRichText — strips hostile markup", () => {
     });
 
     it("drops <iframe> (embed policy: remove)", () => {
-        const out = sanitizeRichText(`<div class="embededContent"><iframe src="https://www.youtube.com/embed/x"></iframe></div>`);
+        const out = sanitizeRichText(
+            `<div class="embededContent"><iframe src="https://www.youtube.com/embed/x"></iframe></div>`
+        );
         expect(out).not.toMatch(/<iframe/i);
         expect(parse(out).querySelector("div.embededContent")).not.toBeNull();
     });
@@ -55,7 +57,9 @@ describe("sanitizeRichText — strips hostile markup", () => {
 describe("sanitizeRichText — preserves widget markup", () => {
     it("keeps a microflow-link anchor intact", () => {
         const a = parse(
-            sanitizeRichText(`<a href="#" class="btn btn-default ${MICROFLOW_LINK_CLASS}" data-mf="DoThing" title="t">Go</a>`)
+            sanitizeRichText(
+                `<a href="#" class="btn btn-default ${MICROFLOW_LINK_CLASS}" data-mf="DoThing" title="t">Go</a>`
+            )
         ).querySelector("a")!;
         expect(a.getAttribute("data-mf")).toBe("DoThing");
         expect(a.getAttribute("href")).toBe("#");
@@ -78,9 +82,9 @@ describe("sanitizeRichText — preserves widget markup", () => {
     });
 
     it("keeps a code block with its language class", () => {
-        const code = parse(
-            sanitizeRichText(`<pre><code class="language-js">const x = 1;</code></pre>`)
-        ).querySelector("pre > code")!;
+        const code = parse(sanitizeRichText(`<pre><code class="language-js">const x = 1;</code></pre>`)).querySelector(
+            "pre > code"
+        )!;
         expect(code.getAttribute("class")).toBe("language-js");
     });
 

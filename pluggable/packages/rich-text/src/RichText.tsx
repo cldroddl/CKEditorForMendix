@@ -1,5 +1,6 @@
 import { ReactElement, useCallback, useRef } from "react";
 import { ValueStatus } from "mendix";
+import { MICROFLOW_LINKS_ENABLED } from "@ckeditorformendix/shared";
 import { RichTextContainerProps } from "../typings/RichTextProps";
 import { Editor } from "./components/Editor";
 import { resolveScriptUrl } from "./ckeditor4/loadCKEditor";
@@ -81,6 +82,7 @@ export function RichText(props: RichTextContainerProps): ReactElement | null {
             countPlugin={props.countPlugin}
             countPluginMaxCount={props.countPluginMaxCount}
             links={microflowLinks.map(l => ({ name: l.functionNames }))}
+            microflowLinksEnabled={MICROFLOW_LINKS_ENABLED}
             onChange={commit}
             onBlur={html => {
                 commit(html);
