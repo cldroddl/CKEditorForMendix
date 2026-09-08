@@ -46,9 +46,12 @@ function injectIconCss(): void {
     iconCssInjected = true;
     const style = document.createElement("style");
     style.dataset.mendixlink = "icon";
+    // Two-class selector so it outweighs moono-lisa's per-button `.cke_button__x_icon`
+    // sprite rules regardless of stylesheet insertion order.
     style.textContent =
-        `.cke_button__${ICON_NAME}_icon{` +
-        `background:url("${ICON_DATA_URI}") center no-repeat!important;background-size:16px 16px!important}`;
+        `.cke_button_icon.cke_button__${ICON_NAME}_icon,` +
+        `.cke_menubutton_icon .cke_button__${ICON_NAME}_icon{` +
+        `background:url("${ICON_DATA_URI}") center/16px 16px no-repeat!important}`;
     document.head.appendChild(style);
 }
 
