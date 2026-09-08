@@ -76,8 +76,8 @@ test("shows the microflow-link toolbar button with its icon", async ({ mount, pa
     const icon = page.locator(".cke_button__mendixlink_icon");
     await expect(icon).toHaveCount(1);
     // The plugin is JS-registered (no icon folder) so it styles the class itself
-    // with an inline SVG data URI — regression guard for the "blank icon" bug.
-    await expect(icon).toHaveCSS("background-image", /data:image\/svg\+xml/);
+    // with the legacy "mx" PNG data URI — regression guard for the "blank icon" bug.
+    await expect(icon).toHaveCSS("background-image", /data:image\/png;base64,/);
 });
 
 test("loads the full-preset plugin set (BASE_EXTRA_PLUGINS regression guard)", async ({ mount, page }) => {

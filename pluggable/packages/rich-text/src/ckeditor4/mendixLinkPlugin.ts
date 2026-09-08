@@ -20,24 +20,22 @@ import { MICROFLOW_LINK_CLASS } from "@ckeditorformendix/shared";
 export const MENDIX_LINK_PLUGIN = "mendixlink";
 
 /**
- * Toolbar / context-menu icon. The legacy plugin loaded `icons/mendixlink.png`
- * from its own folder; this plugin is registered in JS (no folder, no path), so
- * CKEditor's icon machinery can't resolve one and the button rendered blank.
+ * Toolbar / context-menu icon — the legacy "mx" mark
+ * (`src/CKEditorForMendix/widget/lib/plugins/mendixlink/icons/mendixlink.png`,
+ * stripped of Adobe metadata: 49 KB → 618 B).
  *
- * CKEditor 4's `getUrl()` mangles a `data:` URI passed as `icon` (prepends
- * basePath + appends `?t=`), so instead we give the button a plain icon *name*
- * ("mendixlink" → class `.cke_button__mendixlink_icon`, shared by the toolbar
- * button and the context-menu item) and style that class ourselves with an
- * inline SVG data URI injected into the top document. Chain link in Mendix blue
- * — reads as a link, distinct from the grey Link button beside it.
+ * The legacy plugin loaded that PNG from its own folder; this plugin is
+ * registered in JS (no folder, no path), so CKEditor's icon machinery can't
+ * resolve one and the button rendered blank. CKEditor 4's `getUrl()` also
+ * mangles a `data:` URI passed as `icon` (prepends basePath + appends `?t=`), so
+ * instead we give the button a plain icon *name* ("mendixlink" → class
+ * `.cke_button__mendixlink_icon`, shared by the toolbar button and the
+ * context-menu item) and style that class ourselves with the PNG data URI
+ * injected into the top document.
  */
 const ICON_NAME = "mendixlink";
-const ICON_SVG =
-    "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' " +
-    "stroke='#2680eb' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'>" +
-    "<path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/>" +
-    "<path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>";
-const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent(ICON_SVG)}`;
+const ICON_DATA_URI =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACMUlEQVQ4jaVTz0sbYRB987mun0u6JT/EsOxmSwyhiCcPZvFWCEKvPQq5+Af0Wm89CPVv8FbiuceChdJSrIEVhbZEDz2lzaEgUhFK3Gz0ez24lrR4qgOPgYE3M7x5IyRxl1B3YgOQWq1GYww8z3t7dHTUFJHLWq326Pz8fLvX6z1YWFh4U61WoziO75fL5Z39/f3HS0tLrdPT07bruoCIUERYLBY/53K5jlKKpVLpl+/7723bHjiOw5WVlY+2bdN13YuNjY2653lfLcu6bDQaLyAinJycZLPZfJrP50siwtnZ2Z8AUCwWPyil6Hnek2q1+hIAgyDoiQh9338NAEqpaxkmJibunZ2d5QBAREyWRUQwGAz02tras0KhMOr3+6HrulheXn4OAMoYA5Iw5pqTXUUAgKRkzdnpdK7SNAUAGGNwcnKSqShCy7IYhuErAF8A8AbT09PflFIcr9m2PQDAcrm886eBUopzc3M/0jTtD4dDpmlKksMwDBkEAUejkcnqxhjTD4LgyrIsNhqNbUxNTVEpxW6329VafxqfFkURoyj6awOtdby3t/ddRDgzM0OQRKFQIMmoUqkwSZJDksPbkCTJYaVSIcko41w70XGcYxExvu8faK0XRcS+DVrrRd/3D0TEOI5zjExptFqtLQC7JONs2gXJi3q9znq9zn82iQHstlqtLZKwAKDdbsfz8/MPRUQDsG98vrq6+g6AEZHmmP315uZmsr6+Ho/f/b/jzt/4G9P0Kf+E42hSAAAAAElFTkSuQmCC";
 
 let iconCssInjected = false;
 
@@ -50,7 +48,7 @@ function injectIconCss(): void {
     style.dataset.mendixlink = "icon";
     style.textContent =
         `.cke_button__${ICON_NAME}_icon{` +
-        `background:url("${ICON_DATA_URI}") center no-repeat!important;background-size:16px!important}`;
+        `background:url("${ICON_DATA_URI}") center no-repeat!important;background-size:16px 16px!important}`;
     document.head.appendChild(style);
 }
 

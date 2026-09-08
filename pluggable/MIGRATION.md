@@ -49,7 +49,8 @@ paid/commercial.
     -   `mendixlink` (`src/ckeditor4/mendixLinkPlugin.ts`) — port of the legacy `plugin.js` + `dialogs/mendixlink.js`,
         but writes the `data-mf` wire format. No icon folder (JS-registered) and CKEditor 4's `getUrl()` mangles a
         `data:` URI passed as `icon`, so the toolbar/context-menu button gets a plain icon *name* and the plugin
-        styles `.cke_button__mendixlink_icon` itself with an injected inline-SVG data URI.
+        styles `.cke_button__mendixlink_icon` itself with the legacy "mx" PNG (metadata-stripped, 618 B) as a data
+        URI injected into the top document.
     -   `pastebase64` (`src/ckeditor4/pasteBase64Plugin.ts`) — verbatim port of the legacy MIT plugin; enabled when
         Image Mode = Base64.
 -   The bundled `ckeditor.js` is the **"standard-all"** distribution (fewer plugins compiled in than "full"), so
