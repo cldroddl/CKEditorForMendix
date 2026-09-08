@@ -19,7 +19,44 @@ import { MICROFLOW_LINK_CLASS } from "@ckeditorformendix/shared";
 
 export const MENDIX_LINK_PLUGIN = "mendixlink";
 
+/**
+ * Toolbar / context-menu icon. The legacy plugin loaded `icons/mendixlink.png`
+ * from its own folder; this plugin is registered in JS (no folder, no path), so
+ * CKEditor's icon machinery can't resolve one and the button rendered blank.
+ *
+ * CKEditor 4's `getUrl()` mangles a `data:` URI passed as `icon` (prepends
+ * basePath + appends `?t=`), so instead we give the button a plain icon *name*
+ * ("mendixlink" → class `.cke_button__mendixlink_icon`, shared by the toolbar
+ * button and the context-menu item) and style that class ourselves with an
+ * inline SVG data URI injected into the top document. Chain link in Mendix blue
+ * — reads as a link, distinct from the grey Link button beside it.
+ */
+const ICON_NAME = "mendixlink";
+const ICON_SVG =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' " +
+    "stroke='#2680eb' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'>" +
+    "<path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/>" +
+    "<path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>";
+const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent(ICON_SVG)}`;
+
+let iconCssInjected = false;
+
+function injectIconCss(): void {
+    if (iconCssInjected || typeof document === "undefined") {
+        return;
+    }
+    iconCssInjected = true;
+    const style = document.createElement("style");
+    style.dataset.mendixlink = "icon";
+    style.textContent =
+        `.cke_button__${ICON_NAME}_icon{` +
+        `background:url("${ICON_DATA_URI}") center no-repeat!important;background-size:16px!important}`;
+    document.head.appendChild(style);
+}
+
 export function registerMendixLinkPlugin(): void {
+    injectIconCss();
+
     const CKEDITOR = window.CKEDITOR as any;
     if (!CKEDITOR || CKEDITOR.plugins.registered[MENDIX_LINK_PLUGIN]) {
         return;
@@ -32,7 +69,8 @@ export function registerMendixLinkPlugin(): void {
             editor.ui.addButton("mendixlink", {
                 label: "Insert a Mendix microflow link",
                 command: "insertMendixLink",
-                toolbar: "links"
+                toolbar: "links",
+                icon: ICON_NAME
             });
 
             if (editor.contextMenu) {
@@ -40,7 +78,8 @@ export function registerMendixLinkPlugin(): void {
                 editor.addMenuItem("mendixlinkItem", {
                     label: "Edit Mendix link",
                     command: "insertMendixLink",
-                    group: "mendixlinkGroup"
+                    group: "mendixlinkGroup",
+                    icon: ICON_NAME
                 });
                 editor.contextMenu.addListener((element: any) => {
                     const anchor = element && element.getAscendant("a", true);

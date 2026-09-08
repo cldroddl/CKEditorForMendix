@@ -69,6 +69,17 @@ test("loads CKEditor, renders a toolbar and seeds the value", async ({ mount, pa
     expect(data).toContain("hello");
 });
 
+test("shows the microflow-link toolbar button with its icon", async ({ mount, page }) => {
+    const component = await mount(<Editor {...baseProps} />);
+    await expect(component.locator(".cke_top")).toBeVisible({ timeout: 20_000 });
+
+    const icon = page.locator(".cke_button__mendixlink_icon");
+    await expect(icon).toHaveCount(1);
+    // The plugin is JS-registered (no icon folder) so it styles the class itself
+    // with an inline SVG data URI — regression guard for the "blank icon" bug.
+    await expect(icon).toHaveCSS("background-image", /data:image\/svg\+xml/);
+});
+
 test("loads the full-preset plugin set (BASE_EXTRA_PLUGINS regression guard)", async ({ mount, page }) => {
     await mount(<Editor {...baseProps} />);
     await expect
