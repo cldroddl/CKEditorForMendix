@@ -1,6 +1,6 @@
 {
     "name": "ckeditor4formendix-workspace",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "private": true,
     "description": "React + CKEditor 4 rewrite of the CKEditor for Mendix Dojo widgets",
     "license": "Apache-2.0",

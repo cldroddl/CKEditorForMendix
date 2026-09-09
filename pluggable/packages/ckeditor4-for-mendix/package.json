@@ -1,7 +1,7 @@
 {
     "name": "@ckeditor4formendix/editor",
     "widgetName": "CKEditorForMendix",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "WYSIWYG rich-text editor for Mendix, built on CKEditor 4.22.0, with microflow-link support.",
     "copyright": "© Mendix Technology BV 2015-2026",
     "license": "Apache-2.0",
@@ -30,7 +30,7 @@
         "release": "pluggable-widgets-tools release:web"
     },
     "dependencies": {
-        "@ckeditor4formendix/shared": "1.2.0",
+        "@ckeditor4formendix/shared": "1.2.1",
         "classnames": "^2.5.1"
     },
     "devDependencies": {
