@@ -1,7 +1,7 @@
 {
     "name": "@ckeditor4formendix/viewer",
     "widgetName": "CKEditorViewerForMendix",
-    "version": "3.0.0",
+    "version": "1.2.0",
     "description": "Renders stored rich-text HTML for Mendix and executes microflow links on click.",
     "copyright": "© Mendix Technology BV 2015-2026",
     "license": "Apache-2.0",
@@ -30,7 +30,7 @@
         "release": "pluggable-widgets-tools release:web"
     },
     "dependencies": {
-        "@ckeditor4formendix/shared": "3.0.0",
+        "@ckeditor4formendix/shared": "1.2.0",
         "classnames": "^2.5.1",
         "dompurify": "^3.2.4"
     },
