@@ -233,8 +233,13 @@ define([
                 toolbarStartupExpanded: !this.showToolbarCollapsed,
                 // Maximize offset
                 maximizeOffset: this.maximizeOffset,
+                // NOTE: these autoGrow_* keys are inert. The "autogrow" plugin only
+                // works with the classic iframe editing area, but this widget always
+                // loads "divarea" (contentEditable div, no iframe). "autogrow" is also
+                // not in _getPlugins() and not compiled into the bundled ckeditor.js,
+                // so it never runs. The editable area is sized by config.height
+                // (the "height" property; CKEditor default 200px).
                 autoGrow_minHeight : 300,
-                //Autogrow functionality of the editor.
                 autoGrow_onStartup : true,
                 // Base URL inside CKEditor
                 baseHref : mx.appUrl,
