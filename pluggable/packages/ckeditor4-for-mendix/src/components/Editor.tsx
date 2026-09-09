@@ -52,13 +52,19 @@ const ENTER_MODE: Record<EnterMode, number> = { P: 1, BR: 2, DIV: 3 };
  * `flash` is intentionally NOT here: the legacy widget ran CKEditor 4.10, but
  * 4.11+ deprecated the plugin (it emits `editor-plugin-deprecated` on init) and
  * no browser runs Flash any more.
+ *
+ * `autogrow` is intentionally NOT here either: it only works with the classic
+ * iframe editing area, and `divarea` (always on, same as the legacy widget)
+ * replaces that with a contentEditable div. With both loaded autogrow silently
+ * no-ops and the height falls back to `config.height`. The legacy widget never
+ * bundled autogrow — the editable area is governed by the Height property
+ * (`config.height`, CKEditor default 200px).
  */
 const BASE_EXTRA_PLUGINS = [
     "divarea",
     "tableresize",
     "maximize",
     "widget",
-    "autogrow",
     "font",
     "colorbutton",
     "colordialog",
@@ -158,8 +164,6 @@ export function Editor(props: EditorProps): ReactElement {
                     maximizeOffset: p.maximizeOffset,
                     toolbarCanCollapse: true,
                     toolbarStartupExpanded: !p.showToolbarCollapsed,
-                    autoGrow_onStartup: true,
-                    autoGrow_minHeight: 300,
                     bodyClass: p.bodyCssClass || "",
                     oembed_WrapperClass: "embededContent",
                     mendixLink: { links: p.links },

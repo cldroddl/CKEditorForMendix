@@ -57,10 +57,13 @@ paid/commercial.
     `Editor.tsx` `BASE_EXTRA_PLUGINS` explicitly loads the "full"-preset extras that legacy had — `font`, `colorbutton`
     /`colordialog`, `justify`, `find`, `selectall`, `showblocks`, `div`, `bidi`, `indentblock`, `liststyle`, `iframe`,
     `pagebreak`, `smiley`, `templates`, `newpage`, `print`, `preview`, `forms`, `language`, `copyformatting`,
-    `dialogadvtab`, `autogrow` — plus `divarea`, `tableresize`, `maximize`, `widget`, and conditionally `codesnippet`
+    `dialogadvtab` — plus `divarea`, `tableresize`, `maximize`, `widget`, and conditionally `codesnippet`
     (code highlighting) / `wordcount` (Count plugin). All ship in `assets/ckeditor/plugins/`.
     `flash` is deliberately excluded — legacy ran CKEditor 4.10, but 4.11+ deprecated it (`editor-plugin-deprecated`)
-    and no browser runs Flash.
+    and no browser runs Flash. `autogrow` is also excluded: it only works with the classic iframe editing area, and
+    `divarea` (always on, matching legacy) replaces that with a contentEditable div — with both loaded autogrow
+    silently no-ops and the height falls back to `config.height`. Legacy never bundled autogrow; the editable area
+    is sized by the **Height** property (`config.height`, CKEditor default 200 px).
 -   **Not ported yet:** `oembed` / media embed (needs jQuery + a hosted `libs/`), image **upload** (`uploadimage` /
     `simple-image-browser`). `imagePasteMode="upload"` + `imageUploadMicroflow` are accepted in the XML but inert.
 

@@ -108,13 +108,14 @@ test("loads the full-preset plugin set (BASE_EXTRA_PLUGINS regression guard)", a
                 "justify",
                 "find",
                 "copyformatting",
-                "autogrow",
                 "pastebase64"
             ])
         );
-    // `flash` was removed (deprecated in CKEditor 4.11+).
-    const hasFlash = await page.evaluate(() => "flash" in ((window as any).CKEDITOR?.plugins?.registered ?? {}));
-    expect(hasFlash).toBe(false);
+    // `flash` was removed (deprecated in CKEditor 4.11+); `autogrow` was removed
+    // (incompatible with the always-on `divarea` editing area).
+    const registered = await page.evaluate(() => Object.keys((window as any).CKEDITOR?.plugins?.registered ?? {}));
+    expect(registered).not.toContain("flash");
+    expect(registered).not.toContain("autogrow");
 });
 
 test("emits changed HTML through onChange", async ({ mount, page }) => {

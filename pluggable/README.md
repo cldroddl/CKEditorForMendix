@@ -20,7 +20,7 @@ app stopped and its browser tabs closed (see `MIGRATION.md` phase 6). To bundle 
 This widget is the successor to the legacy Dojo **CKEditor for Mendix** (`CKEditorForMendix` /
 `CKEditorViewerForMendix`, Marketplace app 1715). CKEditor 4 is a hard `window.CKEDITOR` page singleton: if the
 legacy widget is anywhere in the app it loads its own CKEditor **4.10** first, and this widget silently reuses that
-stale core — you get `404`s for plugins the 4.10 build lacks (`autogrow`, `copyformatting`, …) and a broken toolbar.
+stale core — you get `404`s for plugins the 4.10 build lacks (`copyformatting`, `colorbutton`, …) and a broken toolbar.
 
 Before adding this widget, remove the legacy one completely:
 
@@ -174,7 +174,7 @@ CKEditor 4.22.0 런타임을 **`.mpk`에 번들**합니다 (~1.1MB, `en`/`ko` �
 이 위젯은 레거시 Dojo **CKEditor for Mendix**(`CKEditorForMendix` / `CKEditorViewerForMendix`, 마켓플레이스 앱 1715)의
 후속입니다. CKEditor 4는 페이지당 `window.CKEDITOR` 하나뿐인 하드 싱글톤이라, 레거시 위젯이 앱 어딘가에 있으면 그게
 먼저 자기 CKEditor **4.10**을 로드하고, 이 위젯은 그 낡은 코어를 조용히 재사용합니다 — 4.10 빌드에 없는 플러그인
-(`autogrow`, `copyformatting`, …)에 대해 `404`가 나고 툴바가 깨집니다.
+(`copyformatting`, `colorbutton`, …)에 대해 `404`가 나고 툴바가 깨집니다.
 
 이 위젯을 추가하기 전에 레거시 위젯을 완전히 제거하세요:
 
